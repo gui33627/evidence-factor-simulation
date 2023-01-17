@@ -239,7 +239,7 @@ size <- power
 
 # c.2) iv is correct, backdoor and front door are wrong 
 # b1, f2, and f3 violated, there are backdoor paths from A to Y, from A to M, and from M to Y
-# when beta = 0, *the identified backdoor and iv functionals are not zero*
+# when beta = 0, *the identified backdoor and front door functionals are not zero*
 p_values_null_iv_correct_b1f2f3_violated <- c()
 for (i in 1:N) {
   

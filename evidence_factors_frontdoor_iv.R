@@ -308,7 +308,7 @@ power <- 1-typeII
 
 
 # a.2) iv is correct, front door is wrong
-p_values_alternative_fdoor_correct_i2_violated <- c()
+p_values_alternative_iv_correct_f3_violated <- c()
 for (i in 1:N) {
   
   df <- dgp_frontdoor_iv_iv_correct_f3_violated(n = n, beta = 10)
@@ -328,11 +328,11 @@ for (i in 1:N) {
   est <- c(frontdoor.est, iv.est)
   eif <- cbind(frontdoor.eif, iv.eif)
   p <- evidence_factor(est = est, eif = eif)
-  p_values_alternative_fdoor_correct_i2_violated <- c(p_values_alternative_fdoor_correct_i2_violated, p)
+  p_values_alternative_iv_correct_f3_violated <- c(p_values_alternative_iv_correct_f3_violated, p)
   print(paste0(i,"th simulation done"))
 }
 
-typeII <- sum(p_values_alternative_fdoor_correct_i2_violated > 0.05)/length(p_values_alternative_fdoor_correct_i2_violated)
+typeII <- sum(p_values_alternative_iv_correct_f3_violated > 0.05)/length(p_values_alternative_iv_correct_f3_violated)
 power <- 1-typeII
 
 # [1] 1
