@@ -21,8 +21,8 @@ dgp_frontdoor_iv_both_correct <- function(n, beta = 3) {
   # Instrumental variable (randomized, (I1) satisfied)
   Z <- rbinom(n = n, size = 1, prob = 0.5)
   
-  # Treatment (a function of C, not of U, there is no unblocked backdoor path from A to M given C, (F2) satisfied)
-  pA.UC <- expit(C[,1] + expit(C[,2]) + sin(C[,3]))
+  # Treatment (a function of U, so backdoor cannot be used)
+  pA.UC <- expit(C[,1] + expit(C[,2]) + sin(C[,3]) + U)
   A1 <- rbinom(n, size = 1, prob = pA.UC)
   A0 <- rbinom(n, size = 1, prob = 1-pA.UC)
   
@@ -36,7 +36,7 @@ dgp_frontdoor_iv_both_correct <- function(n, beta = 3) {
   #  A is determined by Z based on the four types of people, (I4) satisfied
   A <- ifelse(Z == 1, A1, A0)
   
-  # potential outcomes of mediator (not a function of U, so no unblocked backdoor path from M to Y given C, (F3) satisfied)
+  # potential outcomes of mediator (not a function of U, so there is no unblocked backdoor path from A to M given C, (F2) satisfied; no unblocked backdoor path from M to Y given C, (F3) satisfied)
   pM1.AUC <- expit(2 * A1 - 1 + C[,2]) # pM1.AUC and pM0.AUC are the same for never takers and always takers, exclusion restriction satisfied
   pM0.AUC <- expit(2 * A0 - 1 + C[,2])
   M1 <- rbinom(n, size = 1, prob = pM1.AUC) 
@@ -67,6 +67,7 @@ dgp_frontdoor_iv_fdoor_correct_i1_violated <- function(n, beta = 3) {
   
   # Unmeasured confounder
   U <- matrix(runif(n, min=-2,max=2))
+  U1 <- matrix(rnorm(n, mean = 2, sd = 1))
   
   # Measured confounders 
   C <- data.frame(matrix(runif(n * 4, min=-2,max=2), ncol=4))
@@ -75,8 +76,8 @@ dgp_frontdoor_iv_fdoor_correct_i1_violated <- function(n, beta = 3) {
   pZ.C <- expit(2 + U)
   Z <- rbinom(n = n, size = 1, prob = pZ.C)
   
-  # Treatment (a function of C, not of U, there is no unblocked backdoor path from A to M given C, (F2) satisfied)
-  pA.UC <- expit(C[,1] + expit(C[,2]) + sin(C[,3]))
+  # Treatment (a function of U1, so backdoor cannot be used)
+  pA.UC <- expit(C[,1] + expit(C[,2]) + sin(C[,3]) + U1)
   A1 <- rbinom(n, size = 1, prob = pA.UC)
   A0 <- rbinom(n, size = 1, prob = 1-pA.UC)
   
@@ -90,7 +91,7 @@ dgp_frontdoor_iv_fdoor_correct_i1_violated <- function(n, beta = 3) {
   #  A is determined by Z based on the four types of people, (I4) satisfied
   A <- ifelse(Z == 1, A1, A0)
   
-  # potential outcomes of mediator (not a function of U, so no unblocked backdoor path from M to Y given C, (F3) satisfied)
+  # potential outcomes of mediator (not a function of U, so there is no unblocked backdoor path from A to M given C, (F2) satisfied; no unblocked backdoor path from M to Y given C, (F3) satisfied)
   pM1.AUC <- expit(2 * A1 - 1 + C[,2]) # pM1.AUC and pM0.AUC are the same for never takers and always takers, exclusion restriction satisfied
   pM0.AUC <- expit(2 * A0 - 1 + C[,2])
   M1 <- rbinom(n, size = 1, prob = pM1.AUC) 
@@ -98,8 +99,8 @@ dgp_frontdoor_iv_fdoor_correct_i1_violated <- function(n, beta = 3) {
   M <- ifelse(Z == 1, M1, M0) # Z affects M only through A
   
   # potential outcomes of Y (not a function of A, (F1) satisfied; not a function directly of Z, (I2) satisfied)
-  muY1.MAUCZ <- beta*M1 + U - 2* sqrt(abs(C[,1])) + sin(C[,4])
-  muY0.MAUCZ <- beta*M0 + U - 2* sqrt(abs(C[,1])) + sin(C[,4])
+  muY1.MAUCZ <- beta*M1 + U + U1 - 2* sqrt(abs(C[,1])) + sin(C[,4])
+  muY0.MAUCZ <- beta*M0 + U + U1 - 2* sqrt(abs(C[,1])) + sin(C[,4])
   Y1 <- rnorm(n, mean = muY1.MAUCZ)
   Y0 <- rnorm(n, mean = muY0.MAUCZ)
   Y <- ifelse(Z == 1, Y1, Y0) # Z affects Y only through A via M
@@ -122,8 +123,8 @@ dgp_frontdoor_iv_fdoor_correct_i2_violated <- function(n, beta = 3) {
   # Instrumental variable (randomized, (I1) satisfied)
   Z <- rbinom(n = n, size = 1, prob = 0.5)
   
-  # Treatment (a function of C, not of U, there is no unblocked backdoor path from A to M given C, (F2) satisfied)
-  pA.UC <- expit(C[,1] + expit(C[,2]) + sin(C[,3]))
+  # Treatment (a function of U, so backdoor cannot be used) 
+  pA.UC <- expit(C[,1] + expit(C[,2]) + sin(C[,3]) + U)
   A1 <- rbinom(n, size = 1, prob = pA.UC)
   A0 <- rbinom(n, size = 1, prob = 1-pA.UC)
   
@@ -137,7 +138,7 @@ dgp_frontdoor_iv_fdoor_correct_i2_violated <- function(n, beta = 3) {
   #  A is determined by Z based on the four types of people, (I4) satisfied
   A <- ifelse(Z == 1, A1, A0)
   
-  # potential outcomes of mediator (not a function of U, so no unblocked backdoor path from M to Y given C, (F3) satisfied)
+  # potential outcomes of mediator (not a function of U, so there is no unblocked backdoor path from A to M given C, (F2) satisfied; no unblocked backdoor path from M to Y given C, (F3) satisfied)
   pM1.AUC <- expit(2 * A1 - 1 + C[,2]) # pM1.AUC and pM0.AUC are the same for never takers and always takers, exclusion restriction satisfied
   pM0.AUC <- expit(2 * A0 - 1 + C[,2])
   M1 <- rbinom(n, size = 1, prob = pM1.AUC) 
@@ -168,8 +169,8 @@ dgp_frontdoor_iv_fdoor_correct_i3_violated <- function(n, beta = 3) {
   # Instrumental variable (randomized, (I1) satisfied)
   Z <- rbinom(n = n, size = 1, prob = 0.5)
   
-  # Treatment (a function of C, not of U, there is no unblocked backdoor path from A to M given C, (F2) satisfied)
-  pA.UC <- expit(C[,1] + expit(C[,2]) + sin(C[,3]))
+  # Treatment (a function of U, so backdoor cannot be used) 
+  pA.UC <- expit(C[,1] + expit(C[,2]) + sin(C[,3]) + U)
   A1 <- rbinom(n, size = 1, prob = pA.UC)
   A0 <- rbinom(n, size = 1, prob = 1-pA.UC)
   
@@ -182,11 +183,11 @@ dgp_frontdoor_iv_fdoor_correct_i3_violated <- function(n, beta = 3) {
   #  A is determined by Z based on the four types of people, (I4) satisfied
   A <- ifelse(Z == 1, A1, A0)
   
-  # potential outcomes of mediator (not a function of U, so no unblocked backdoor path from M to Y given C, (F3) satisfied)
-  pM1.AUC <- expit(20 * A1 - 1 + C[,2]) # pM1.AUC and pM0.AUC are the same for never takers and always takers, exclusion restriction satisfied
-  pM0.AUC <- expit(20 * A0 - 1 + C[,2])
-  pM1.AUC[idx_defier] <- expit(2 * A1[idx_defier] - 1 + C[,2][idx_defier])
-  pM0.AUC[idx_defier] <- expit(2 * A0[idx_defier] - 1 + C[,2][idx_defier])
+  # potential outcomes of mediator (not a function of U, so there is no unblocked backdoor path from A to M given C, (F2) satisfied; no unblocked backdoor path from M to Y given C, (F3) satisfied)
+  pM1.AUC <- expit(2 * A1 - 1 + C[,2]) # pM1.AUC and pM0.AUC are the same for never takers and always takers, exclusion restriction satisfied
+  pM0.AUC <- expit(2 * A0 - 1 + C[,2])
+  pM1.AUC[idx_defier] <- expit(1 * A1[idx_defier] - 1 + C[,2][idx_defier])
+  pM0.AUC[idx_defier] <- expit(1 * A0[idx_defier] - 1 + C[,2][idx_defier])
   M1 <- rbinom(n, size = 1, prob = pM1.AUC) 
   M0 <- rbinom(n, size = 1, prob = pM0.AUC)
   M <- ifelse(Z == 1, M1, M0) # Z affects M only through A
@@ -215,8 +216,8 @@ dgp_frontdoor_iv_fdoor_correct_i4_violated <- function(n, beta = 3) {
   # Instrumental variable (randomized, (I1) satisfied)
   Z <- rbinom(n = n, size = 1, prob = 0.5)
   
-  # Treatment (a function of C, not of U, there is no unblocked backdoor path from A to M given C, (F2) satisfied)
-  pA.UC <- expit(C[,1] + expit(C[,2]) + sin(C[,3]))
+  # Treatment (a function of U, so backdoor cannot be used) 
+  pA.UC <- expit(C[,1] + expit(C[,2]) + sin(C[,3]) + U)
   A1 <- rbinom(n, size = 1, prob = pA.UC)
   A0 <- rbinom(n, size = 1, prob = 1-pA.UC)
   
@@ -230,7 +231,7 @@ dgp_frontdoor_iv_fdoor_correct_i4_violated <- function(n, beta = 3) {
   # A is randomized, no connection with Z ((I4) violated)
   A <- A1
   
-  # Mediator (not a function of U, so no unblocked backdoor path from M to Y given C, (F3) satisfied)
+  # Mediator (not a function of U, so there is no unblocked backdoor path from A to M given C, (F2) satisfied; no unblocked backdoor path from M to Y given C, (F3) satisfied)
   pM.AUC <- expit(2 * A - 1 + C[,2])
   M <- rbinom(n, size = 1, prob = pM.AUC) 
   
