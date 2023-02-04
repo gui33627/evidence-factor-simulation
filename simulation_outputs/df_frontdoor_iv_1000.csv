@@ -1,0 +1,13 @@
+"","backdoor","frontdoor","iv","backdoor_true_functional","frontdoor_true_functional","iv_true_functional","b1","b2","f1","f2","f3","i1","i2","i3","i4","hypothesis","beta","sample_size","size","power"
+"1",NA,"TRUE","TRUE",NA,"0","0",NA,NA,"TRUE","TRUE","TRUE","TRUE","TRUE","TRUE","TRUE","N","0","1000","0",NA
+"2",NA,"TRUE","FALSE",NA,"0","1",NA,NA,"TRUE","TRUE","TRUE","FALSE","TRUE","TRUE","TRUE","N","0","1000","0.037",NA
+"3",NA,"TRUE","FALSE",NA,"0","1",NA,NA,"TRUE","TRUE","TRUE","TRUE","FALSE","TRUE","TRUE","N","0","1000","0.053",NA
+"4",NA,"TRUE","FALSE",NA,"0","0",NA,NA,"TRUE","TRUE","TRUE","TRUE","TRUE","FALSE","TRUE","N","0","1000","0",NA
+"5",NA,"TRUE","FALSE",NA,"0","0",NA,NA,"TRUE","TRUE","TRUE","TRUE","TRUE","TRUE","FALSE","N","0","1000","0",NA
+"6",NA,"FALSE","TRUE",NA,"0","0",NA,NA,"FALSE","TRUE","TRUE","TRUE","TRUE","TRUE","TRUE","N","0","1000","0",NA
+"7",NA,"FALSE","TRUE",NA,"1","0",NA,NA,"TRUE","TRUE","FALSE","TRUE","TRUE","TRUE","TRUE","N","0","1000","0.026",NA
+"8",NA,"TRUE","FALSE",NA,"1","1",NA,NA,"TRUE","TRUE","TRUE","TRUE","FALSE","TRUE","TRUE","A","10","1000",NA,"1"
+"9",NA,"FALSE","TRUE",NA,"1","1",NA,NA,"TRUE","TRUE","FALSE","TRUE","TRUE","TRUE","TRUE","A","10","1000",NA,"1"
+"10",NA,"TRUE","TRUE",NA,"1","1",NA,NA,"TRUE","TRUE","TRUE","TRUE","TRUE","TRUE","TRUE","A","10","1000",NA,"0.994"
+"11",NA,"FALSE","TRUE",NA,"0","1",NA,NA,"FALSE","TRUE","TRUE","TRUE","TRUE","TRUE","TRUE","A","10","1000",NA,"0.0590000000000001"
+"12",NA,"TRUE","FALSE",NA,"1","0",NA,NA,"TRUE","TRUE","TRUE","TRUE","TRUE","TRUE","FALSE","A","10","1000",NA,NA

@@ -184,8 +184,8 @@ dgp_backdoor_iv_iv_correct_b1_violated <- function(n, beta = 4) {
   
   # Outcome (not a function directly of Z, Z only affects the outcome through the treatment, (I2) satisfied)
   # potential outcomes of Y
-  muY1.AUCZ <- beta*A1 + U - 2* sqrt(abs(C[,1])) + sin(C[,4])
-  muY0.AUCZ <- beta*A0 + U - 2* sqrt(abs(C[,1])) + sin(C[,4])
+  muY1.AUCZ <- beta*A1 + U + 2* sqrt(abs(C[,1])) + sin(C[,4])
+  muY0.AUCZ <- beta*A0 + U + 2* sqrt(abs(C[,1])) + sin(C[,4])
   Y1 <- rnorm(n, mean = muY1.AUCZ)
   Y0 <- rnorm(n, mean = muY0.AUCZ)
   Y <- ifelse(Z == 1, Y1, Y0) 
@@ -208,7 +208,7 @@ dgp_backdoor_iv_iv_correct_b2_violated <- function(n, beta = 4) {
   C <- data.frame(matrix(runif(n * 4, min=-2,max=2), ncol=4))
   
   # Treatment (a function of C, not of U, (B1) satisfied)
-  pA.UC <- expit(C[,1] + expit(C[,2]) + sin(C[,3]))
+  pA.UC <- expit(C[,4] + expit(C[,2]) + sin(C[,3]))
   A1 <- rbinom(n, size = 1, prob = pA.UC)
   A0 <- rbinom(n, size = 1, prob = 1-pA.UC)
   
@@ -231,7 +231,7 @@ dgp_backdoor_iv_iv_correct_b2_violated <- function(n, beta = 4) {
   Y <- ifelse(Z == 1, Y1, Y0) 
   
   # Measured confounders (a node in C is a collider, (B2) violated)
-  C[,1] <- rnorm(n, mean = (5*A + 2*Y))
+  C[,1] <- rnorm(n, mean = (A + Y))
   
   PO.diff.CACE <- Y1[idx_complier] - Y0[idx_complier]
   

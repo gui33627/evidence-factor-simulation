@@ -92,15 +92,15 @@ dgp_frontdoor_iv_fdoor_correct_i1_violated <- function(n, beta = 3) {
   A <- ifelse(Z == 1, A1, A0)
   
   # potential outcomes of mediator (not a function of U, so there is no unblocked backdoor path from A to M given C, (F2) satisfied; no unblocked backdoor path from M to Y given C, (F3) satisfied)
-  pM1.AUC <- expit(2 * A1 - 1 + C[,2]) # pM1.AUC and pM0.AUC are the same for never takers and always takers, exclusion restriction satisfied
-  pM0.AUC <- expit(2 * A0 - 1 + C[,2])
+  pM1.AUC <- expit(5 * A1 - 1 + C[,2]) # pM1.AUC and pM0.AUC are the same for never takers and always takers, exclusion restriction satisfied
+  pM0.AUC <- expit(5 * A0 - 1 + C[,2])
   M1 <- rbinom(n, size = 1, prob = pM1.AUC) 
   M0 <- rbinom(n, size = 1, prob = pM0.AUC)
   M <- ifelse(Z == 1, M1, M0) # Z affects M only through A
   
   # potential outcomes of Y (not a function of A, (F1) satisfied; not a function directly of Z, (I2) satisfied)
-  muY1.MAUCZ <- beta*M1 + U + U1 - 2* sqrt(abs(C[,1])) + sin(C[,4])
-  muY0.MAUCZ <- beta*M0 + U + U1 - 2* sqrt(abs(C[,1])) + sin(C[,4])
+  muY1.MAUCZ <- beta*M1 + U + U1 + 2* sqrt(abs(C[,1])) + sin(C[,4])
+  muY0.MAUCZ <- beta*M0 + U + U1 + 2* sqrt(abs(C[,1])) + sin(C[,4])
   Y1 <- rnorm(n, mean = muY1.MAUCZ)
   Y0 <- rnorm(n, mean = muY0.MAUCZ)
   Y <- ifelse(Z == 1, Y1, Y0) # Z affects Y only through A via M
@@ -337,15 +337,15 @@ dgp_frontdoor_iv_iv_correct_f3_violated <- function(n, beta = 3) {
   A <- ifelse(Z == 1, A1, A0)
   
   # potential outcomes of mediator (a function of U, so there is an unblocked backdoor path from M to Y given C, (F3) violated)
-  pM1.AUC <- expit(20 * A1 - 1 + C[,2] + U) # pM1.AUC and pM0.AUC are the same for never takers and always takers, exclusion restriction satisfied
-  pM0.AUC <- expit(20 * A0 - 1 + C[,2] + U)
+  pM1.AUC <- expit(5 * A1 - 1 + C[,2] + U) # pM1.AUC and pM0.AUC are the same for never takers and always takers, exclusion restriction satisfied
+  pM0.AUC <- expit(5 * A0 - 1 + C[,2] + U)
   M1 <- rbinom(n, size = 1, prob = pM1.AUC) 
   M0 <- rbinom(n, size = 1, prob = pM0.AUC)
   M <- ifelse(Z == 1, M1, M0) # Z affects M only through A
   
   # potential outcomes of Y (not a function of A, (F1) satisfied; not a function directly of Z, (I2) satisfied)
-  muY1.MAUCZ <- beta*M1 + 5*U - 2* sqrt(abs(C[,1])) + sin(C[,4])
-  muY0.MAUCZ <- beta*M0 + 5*U - 2* sqrt(abs(C[,1])) + sin(C[,4])
+  muY1.MAUCZ <- beta*M1 + U + 2* sqrt(abs(C[,1])) + sin(C[,4])
+  muY0.MAUCZ <- beta*M0 + U + 2* sqrt(abs(C[,1])) + sin(C[,4])
   Y1 <- rnorm(n, mean = muY1.MAUCZ)
   Y0 <- rnorm(n, mean = muY0.MAUCZ)
   Y <- ifelse(Z == 1, Y1, Y0) # Z affects Y only through A via M
