@@ -1,6 +1,6 @@
 
 library(tidyverse)
-prefix <- "/Volumes/GoogleDrive/My Drive/UMASS/simulations.v3.hpc/"
+prefix <- "/Users/junhui/Library/CloudStorage/GoogleDrive-junhuiyang@umass.edu/My Drive/UMASS/simulations.hpc/simulation_results/"
 
 model_status <- function(df_backdoor_frontdoor){
   all_results <- c()
@@ -58,7 +58,8 @@ df_backdoor_frontdoor_iv_1000 <- read.csv(paste0(prefix, "df_backdoor_frontdoor_
 df_backdoor_frontdoor_iv <- as.data.frame(rbind(df_backdoor_frontdoor_iv_250, df_backdoor_frontdoor_iv_500, 
                                                 df_backdoor_frontdoor_iv_750, df_backdoor_frontdoor_iv_1000))
 df_backdoor_frontdoor_iv <- df_backdoor_frontdoor_iv %>% 
-  filter(!(b1 == T& b2 == T& f1 == T& f2 == T& f3 ==T& i1 == T& i2 ==T& i3 ==T& i4 ==F)) %>% 
+  # delete the case because the power at sample size 250 is NA
+  filter(!(b1 == T& b2 == T& f1 == T& f2 == T& f3 ==F& i1 == T& i2 ==T& i3 ==F& i4 ==T)) %>% 
   arrange(b1, b2, f1, f2, f3, i1, i2, i3, i4, beta)
 
 
@@ -67,9 +68,8 @@ df_bdoor_iv_500 <- read.csv(paste0(prefix, "df_backdoor_iv_500.csv"))
 df_bdoor_iv_750 <- read.csv(paste0(prefix, "df_backdoor_iv_750.csv"))
 df_bdoor_iv_1000 <- read.csv(paste0(prefix, "df_backdoor_iv_1000.csv"))
 df_bdoor_iv <- as.data.frame(rbind(df_bdoor_iv_250, df_bdoor_iv_500, df_bdoor_iv_750, df_bdoor_iv_1000))
-# delete the case when i4 is violated because the size and power are NA
-df_bdoor_iv <- df_bdoor_iv %>% filter(!(b1 == T& b2 == T& i1 == T& i2 ==T& i3 ==T& i4 ==F)) %>% 
-  arrange(b1, b2, f1, f2, f3, i1, i2, i3, i4, beta)
+
+df_bdoor_iv <- df_bdoor_iv %>% arrange(b1, b2, f1, f2, f3, i1, i2, i3, i4, beta)
 
 
 df_fdoor_iv_250 <- read.csv(paste0(prefix, "df_frontdoor_iv_250.csv"))
@@ -77,15 +77,13 @@ df_fdoor_iv_500 <- read.csv(paste0(prefix, "df_frontdoor_iv_500.csv"))
 df_fdoor_iv_750 <- read.csv(paste0(prefix, "df_frontdoor_iv_750.csv"))
 df_fdoor_iv_1000 <- read.csv(paste0(prefix, "df_frontdoor_iv_1000.csv"))
 df_fdoor_iv <- as.data.frame(rbind(df_fdoor_iv_250, df_fdoor_iv_500, df_fdoor_iv_750, df_fdoor_iv_1000))
-# delete the case when i4 is violated because the size and power are NA
-df_fdoor_iv <- df_fdoor_iv %>% filter(!(f1 == T& f2 == T& f3 ==T& i1 == T& i2 ==T& i3 ==T& i4 ==F)) %>% 
-  arrange(b1, b2, f1, f2, f3, i1, i2, i3, i4, beta)
+df_fdoor_iv <- df_fdoor_iv %>% arrange(b1, b2, f1, f2, f3, i1, i2, i3, i4, beta)
 
-# write the summary tables
-write.csv(df_backdoor_frontdoor, paste0(prefix, "backdoor_frontdoor_simulation_results.csv"))
-write.csv(df_backdoor_frontdoor_iv, paste0(prefix, "backdoor_frontdoor_iv_simulation_results.csv"))
-write.csv(df_fdoor_iv, paste0(prefix, "frontdoor_iv_simulation_results.csv"))
-write.csv(df_bdoor_iv, paste0(prefix, "backdoor_iv_simulation_results.csv"))
+# # write the summary tables
+# write.csv(df_backdoor_frontdoor, paste0(prefix, "backdoor_frontdoor_simulation_results.csv"))
+# write.csv(df_backdoor_frontdoor_iv, paste0(prefix, "backdoor_frontdoor_iv_simulation_results.csv"))
+# write.csv(df_fdoor_iv, paste0(prefix, "frontdoor_iv_simulation_results.csv"))
+# write.csv(df_bdoor_iv, paste0(prefix, "backdoor_iv_simulation_results.csv"))
 
 
 df_backdoor_frontdoor$model_status <- model_status(df_backdoor_frontdoor)
@@ -93,214 +91,188 @@ df_backdoor_frontdoor_iv$model_status <- model_status(df_backdoor_frontdoor_iv)
 df_bdoor_iv$model_status <- model_status(df_bdoor_iv)
 df_fdoor_iv$model_status <- model_status(df_fdoor_iv)
 
+
+# df_backdoor_frontdoor <- df_backdoor_frontdoor %>% mutate(backdoor_true_functional = ifelse(backdoor_true_functional == 0, "Zero", "Non-Zero"),
+#                                                           frontdoor_true_functional = ifelse(frontdoor_true_functional == 0, "Zero", "Non-Zero"))
+# df_backdoor_frontdoor_iv <- df_backdoor_frontdoor_iv %>% mutate(backdoor_true_functional = ifelse(backdoor_true_functional == 0, "Zero", "Non-Zero"),
+#                                                                 frontdoor_true_functional = ifelse(frontdoor_true_functional == 0, "Frontdoor: Zero", "Frontdoor: Non-Zero"),
+#                                                                 iv_true_functional = ifelse(iv_true_functional == 0, "IV: Zero", "IV: Non-Zero"))
+# df_bdoor_iv <- df_bdoor_iv %>% mutate(backdoor_true_functional = ifelse(backdoor_true_functional == 0, "Zero", "Non-Zero"),
+#                                       iv_true_functional = ifelse(iv_true_functional == 0, "Zero", "Non-Zero"))
+# df_fdoor_iv <- df_fdoor_iv %>% mutate(iv_true_functional = ifelse(iv_true_functional == 0, "Zero", "Non-Zero"),
+#                                       frontdoor_true_functional = ifelse(frontdoor_true_functional == 0, "Zero", "Non-Zero"))
+
+
+################################################################################
+# new grid plot
 # BACKDOOR + FRONTDOOR
 # UNDER THE NULL
 df_backdoor_frontdoor_null_all <- df_backdoor_frontdoor %>% filter(hypothesis == "N") %>% 
   mutate(nonzero_functionals = ifelse(frontdoor_true_functional == 1|backdoor_true_functional == 1, TRUE, FALSE)) %>% 
-  ggplot(., aes(x = sample_size, y = 1-size, color = model_status, linetype = nonzero_functionals)) + 
-  geom_line() + ylim(0.9,1) +
+  ggplot(., aes(x = sample_size, y = size, color = model_status, linetype = nonzero_functionals)) + 
+  geom_line() + 
+  ggh4x::facet_nested("Frontdoor" + frontdoor ~ "Backdoor" + backdoor) +
+  geom_hline(aes(yintercept=0.05), linetype="dashed", color = "black") +
   labs(x = "Sample Size",
-       y = "True Negative Rate",
-       title= "Backdoor + Frontdoor, Under the Null",
-       color = "Assumption Violation Status", 
-       linetype = "Non-Zero Functional In Wrong Model") +
-  scale_x_continuous(breaks=c(250, 500, 750, 1000)) +
-  theme(legend.position = c(.95, .05),
-        legend.justification = c("right", "bottom"),
-        legend.box.just = "bottom",
-        legend.margin = margin(6, 6, 6, 6),
-        legend.text = element_text(size = 7),
-        legend.title = element_text(size = 8),
-        legend.box = "horizontal",
-        plot.title = element_text(hjust = 0.5)) + 
-  guides(linetype = guide_legend(order = 1),
-         col = guide_legend(order = 2))
+       y = "Type I Error Rate",
+       title= "Backdoor + Frontdoor, Under the Null (\u03b1 = 0.05)",
+       linetype = "Non-Zero Identified Functional In Wrong Model",
+       caption = "Note: colors represent violations of different assumptions in the wrong model") +
+  scale_x_continuous(breaks=c(250, 500, 750, 1000)) + 
+  theme(legend.position="bottom",
+        plot.title = element_text(hjust = 0.5)) +
+  guides(color = "none")
 
 df_backdoor_frontdoor_null_all
-ggsave("backdoor_frontdoor_null_all.png", path =  paste0(prefix, "plots/"), 
-       width = 20, height = 15, units = "cm")
+ggsave("v2.backdoor_frontdoor_null_all.png", path =  paste0(prefix, "plots/"),
+       width = 15, height = 15, units = "cm")
 
 # UNDER THE ALTERNATIVE
 df_backdoor_frontdoor_alt_all <- df_backdoor_frontdoor %>% filter(hypothesis == "A") %>% 
   mutate(nonzero_functionals = ifelse(frontdoor_true_functional == 1 & backdoor_true_functional == 1, TRUE, FALSE)) %>% 
   ggplot(., aes(x = sample_size, y = power, color = model_status, linetype = nonzero_functionals)) + 
   geom_line() +
-  labs(x = "Sample Size", y = "True Positive Rate",
-       title= "Backdoor + Frontdoor, Under the Alternative",
-       color = "Assumption Violation Status", 
-       linetype = "Non-Zero Functional In Wrong Model") +
-  scale_x_continuous(breaks=c(250, 500, 750, 1000)) +
-  theme(legend.position = c(.95, .2),
-        legend.justification = c("right", "bottom"),
-        legend.box.just = "right",
-        legend.margin = margin(6, 6, 6, 6),
-        legend.text = element_text(size = 7),
-        legend.title = element_text(size = 8),
-        plot.title = element_text(hjust = 0.5)) + 
-  guides(linetype = guide_legend(order = 1),
-         col = guide_legend(order = 2))
+  ggh4x::facet_nested("Frontdoor" + frontdoor ~ "Backdoor" + backdoor) +
+  labs(x = "Sample Size", y = "Power",
+       title= "Backdoor + Frontdoor, Under the Alternative (\u03b1 = 0.05)",
+       linetype = "Non-Zero Identified Functional In Wrong Model",
+       caption = "Note: colors represent violations of different assumptions in the wrong model") +
+  scale_x_continuous(breaks=c(250, 500, 750, 1000)) + 
+  theme(legend.position="bottom",
+        plot.title = element_text(hjust = 0.5)) +
+  guides(color = "none")
 
 df_backdoor_frontdoor_alt_all
-ggsave("backdoor_frontdoor_alternative_all.png", path =  paste0(prefix, "plots/"),
-       width = 20, height = 15, units = "cm")
+ggsave("v2.backdoor_frontdoor_alternative_all.png", path =  paste0(prefix, "plots/"),
+       width = 15, height = 15, units = "cm")
 
 
 # BACKDOOR + FRONTDOOR + IV
 # UNDER THE NULL
 df_backdoor_frontdoor_iv_null_all <- df_backdoor_frontdoor_iv %>% filter(hypothesis == "N") %>% 
-  mutate(nonzero_functionals = ifelse(backdoor_true_functional == 1|frontdoor_true_functional == 1|iv_true_functional == 1, TRUE, FALSE)) %>% 
-  ggplot(., aes(x = sample_size, y = 1-size, color = model_status, linetype = nonzero_functionals)) + 
-  geom_line() + ylim(0.9,1) +
-  labs(x = "Sample Size", y = "True Negative Rate",
-       title= "Backdoor + Frontdoor + IV, Under the Null",
-       color = "Assumption Violation Status",
-       linetype = "Non-Zero Functional In Wrong Model") +
-  scale_x_continuous(breaks=c(250, 500, 750, 1000)) +
-  theme(legend.position = c(.95, .05),
-        legend.justification = c("right", "bottom"),
-        legend.box.just = "bottom",
-        legend.margin = margin(6, 6, 6, 6),
-        legend.text = element_text(size = 7),
-        legend.title = element_text(size = 8),
-        legend.box = "horizontal",
-        plot.title = element_text(hjust = 0.5)) + 
-  guides(linetype = guide_legend(order = 1),
-         col = guide_legend(order = 2))
+  mutate(nonzero_functionals = ifelse((backdoor_true_functional == 1 & frontdoor_true_functional == 1) | (backdoor_true_functional == 1 & iv_true_functional == 1) | (frontdoor_true_functional == 1 & iv_true_functional == 1), TRUE, FALSE)) %>% 
+  ggplot(., aes(x = sample_size, y = size, color = model_status, linetype = nonzero_functionals)) + 
+  geom_line() + 
+  ggh4x::facet_nested(frontdoor + iv ~ backdoor, labeller = label_both) +
+  geom_hline(aes(yintercept=0.05), linetype="dashed", color = "black") +
+  labs(x = "Sample Size",
+       y = "Type I Error Rate",
+       title= "Backdoor + Frontdoor + IV, Under the Null (\u03b1 = 0.05)",
+       linetype = "Non-Zero Identified Functional In Wrong Model",
+       caption = "Note: colors represent violations of different assumptions in the wrong model") +
+  scale_x_continuous(breaks=c(250, 500, 750, 1000)) + 
+  theme(legend.position="bottom",
+        plot.title = element_text(hjust = 0.5)) +
+  guides(color = "none")
 
 df_backdoor_frontdoor_iv_null_all
-ggsave("backdoor_frontdoor_iv_null_all.png", path =  paste0(prefix, "plots/"),
-       width = 20, height = 15, units = "cm")
+ggsave("v2.backdoor_frontdoor_iv_null_all.png", path =  paste0(prefix, "plots/"),
+       width = 15, height = 15, units = "cm")
+
 
 # UNDER THE ALTERNATIVE
 df_backdoor_frontdoor_iv_alt_all <- df_backdoor_frontdoor_iv %>% filter(hypothesis == "A") %>% 
   mutate(nonzero_functionals = ifelse(backdoor_true_functional == 1 & frontdoor_true_functional == 1 & iv_true_functional == 1, TRUE, FALSE)) %>% 
   ggplot(., aes(x = sample_size, y = power, color = model_status, linetype = nonzero_functionals)) + 
   geom_line() +
-  labs(x = "Sample Size", y = "True Positive Rate",
-       title= "Backdoor + Frontdoor + IV, Under the Alternative",
-       color = "Assumption Violation Status",
-       linetype = "Non-Zero Functional In Wrong Model") +
-  scale_x_continuous(breaks=c(250, 500, 750, 1000)) +
-  theme(legend.position = c(.95, .36),
-        legend.justification = c("right", "bottom"),
-        legend.box.just = "bottom",
-        legend.margin = margin(6, 6, 6, 6),
-        legend.text = element_text(size = 7),
-        legend.title = element_text(size = 8),
-        legend.box = "horizontal",
-        plot.title = element_text(hjust = 0.5)) + 
-  guides(linetype = guide_legend(order = 1),
-         col = guide_legend(order = 2))
+  ggh4x::facet_nested(frontdoor + iv ~ backdoor, labeller = label_both) +
+  labs(x = "Sample Size", y = "Power",
+       title= "Backdoor + Frontdoor + IV, Under the Alternative (\u03b1 = 0.05)",
+       linetype = "Non-Zero Identified Functional In Wrong Model",
+       caption = "Note: colors represent violations of different assumptions in the wrong model") +
+  scale_x_continuous(breaks=c(250, 500, 750, 1000)) + 
+  theme(legend.position="bottom",
+        plot.title = element_text(hjust = 0.5)) +
+  # guides(colour = guide_legend(ncol=2,nrow=6,byrow=TRUE))
+  guides(color = "none")
 
 df_backdoor_frontdoor_iv_alt_all
-ggsave("backdoor_frontdoor_iv_alternative_all.png", path =  paste0(prefix, "plots/"),
-       width = 25, height = 20, units = "cm")
+ggsave("v2.backdoor_frontdoor_iv_alternative_all.png", path =  paste0(prefix, "plots/"),
+       width = 15, height = 15, units = "cm")
 
 
 # BACKDOOR + IV
 # UNDER THE NULL
 df_bdoor_iv_null_all <- df_bdoor_iv %>% filter(hypothesis == "N") %>% 
   mutate(nonzero_functionals = ifelse(backdoor_true_functional == 1|iv_true_functional == 1, TRUE, FALSE)) %>% 
-  ggplot(., aes(x = sample_size, y = 1-size, color = model_status, linetype = nonzero_functionals)) + 
-  geom_line() + ylim(0.9,1) +
-  labs(x = "Sample Size", y = "True Negative Rate",
-       title= "Backdoor + IV, Under the Null",
-       color = "Assumption Violation Status",
-       linetype = "Non-Zero Functional In Wrong Model") +
-  scale_x_continuous(breaks=c(250, 500, 750, 1000)) +
-  theme(legend.position = c(.95, .05),
-        legend.justification = c("right", "bottom"),
-        legend.box.just = "bottom",
-        legend.margin = margin(6, 6, 6, 6),
-        legend.text = element_text(size = 7),
-        legend.title = element_text(size = 8),
-        legend.box = "horizontal",
-        plot.title = element_text(hjust = 0.5)) + 
-  guides(linetype = guide_legend(order = 1),
-         col = guide_legend(order = 2))
+  ggplot(., aes(x = sample_size, y = size, color = model_status, linetype = nonzero_functionals)) + 
+  geom_line() + 
+  ggh4x::facet_nested("IV" + iv ~ "Backdoor" + backdoor) +
+  geom_hline(aes(yintercept=0.05), linetype="dashed", color = "black") +
+  labs(x = "Sample Size",
+       y = "Type I Error Rate",
+       title= "Backdoor + IV, Under the Null (\u03b1 = 0.05)",
+       linetype = "Non-Zero Identified Functional In Wrong Model",
+       caption = "Note: colors represent violations of different assumptions in the wrong model") +
+  scale_x_continuous(breaks=c(250, 500, 750, 1000)) + 
+  theme(legend.position="bottom",
+        plot.title = element_text(hjust = 0.5)) +
+  guides(color = "none")
 
 df_bdoor_iv_null_all
-ggsave("backdoor_iv_null_all.png", path =  paste0(prefix, "plots/"),
-       width = 20, height = 15, units = "cm")
+ggsave("v2.backdoor_iv_null_all.png", path =  paste0(prefix, "plots/"),
+       width = 15, height = 15, units = "cm")
 
 # UNDER THE ALTERNATIVE
 df_bdoor_iv_alt_all <- df_bdoor_iv %>% filter(hypothesis == "A") %>% 
   mutate(nonzero_functionals = ifelse(backdoor_true_functional == 1 & iv_true_functional == 1, TRUE, FALSE)) %>% 
   ggplot(., aes(x = sample_size, y = power, color = model_status, linetype = nonzero_functionals)) + 
   geom_line() +
-  labs(x = "Sample Size", y = "True Positive Rate",
-       title= "Backdoor + IV, Under the Alternative",
-       color = "Assumption Violation Status", 
-       linetype = "Non-Zero Functional In Wrong Model") +
-  scale_x_continuous(breaks=c(250, 500, 750, 1000)) +
-  theme(legend.position = c(.95, .1),
-        legend.justification = c("right", "bottom"),
-        legend.box.just = "bottom",
-        legend.margin = margin(6, 6, 6, 6),
-        legend.text = element_text(size = 7),
-        legend.title = element_text(size = 8),
-        legend.box = "horizontal",
-        plot.title = element_text(hjust = 0.5)) + 
-  guides(linetype = guide_legend(order = 1),
-         col = guide_legend(order = 2))
+  ggh4x::facet_nested("IV" + iv ~ "Backdoor" + backdoor) +
+  labs(x = "Sample Size", y = "Power",
+       title= "Backdoor + IV, Under the Alternative (\u03b1 = 0.05)",
+       linetype = "Non-Zero Identified Functional In Wrong Model",
+       caption = "Note: colors represent violations of different assumptions in the wrong model") +
+  scale_x_continuous(breaks=c(250, 500, 750, 1000)) + 
+  theme(legend.position="bottom",
+        plot.title = element_text(hjust = 0.5)) +
+  guides(color = "none")
 
 df_bdoor_iv_alt_all
-ggsave("backdoor_iv_alternative_all.png", path =  paste0(prefix, "plots/"),
-       width = 20, height = 15, units = "cm")
+ggsave("v2.backdoor_iv_alternative_all.png", path =  paste0(prefix, "plots/"),
+       width = 15, height = 15, units = "cm")
 
 
 # FRONTDOOR + IV
 # UNDER THE NULL
 df_fdoor_iv_null_all <- df_fdoor_iv %>% filter(hypothesis == "N") %>% 
   mutate(nonzero_functionals = ifelse(frontdoor_true_functional == 1|iv_true_functional == 1, TRUE, FALSE)) %>% 
-  ggplot(., aes(x = sample_size, y = 1-size, color = model_status, linetype = nonzero_functionals)) + 
-  geom_line() + ylim(0.9,1) +
-  labs(x = "Sample Size", y = "True Negative Rate",
-       title= "Frontdoor + IV, Under the Null",
-       color = "Assumption Violation Status", 
-       linetype = "Non-Zero Functional In Wrong Model") +
-  scale_x_continuous(breaks=c(250, 500, 750, 1000)) +
-  theme(legend.position = c(.95, .05),
-        legend.justification = c("right", "bottom"),
-        legend.box.just = "bottom",
-        legend.margin = margin(6, 6, 6, 6),
-        legend.text = element_text(size = 7),
-        legend.title = element_text(size = 8),
-        legend.box = "horizontal",
-        plot.title = element_text(hjust = 0.5)) + 
-  guides(linetype = guide_legend(order = 1),
-         col = guide_legend(order = 2))
+  ggplot(., aes(x = sample_size, y = size, color = model_status, linetype = nonzero_functionals)) + 
+  geom_line() + 
+  ggh4x::facet_nested("IV" + iv ~ "Frontdoor" + frontdoor) +
+  geom_hline(aes(yintercept=0.05), linetype="dashed", color = "black") +
+  labs(x = "Sample Size",
+       y = "Type I Error Rate",
+       title= "Frontdoor + IV, Under the Null (\u03b1 = 0.05)",
+       linetype = "Non-Zero Identified Functional In Wrong Model",
+       caption = "Note: colors represent violations of different assumptions in the wrong model") +
+  scale_x_continuous(breaks=c(250, 500, 750, 1000)) + 
+  theme(legend.position="bottom",
+        plot.title = element_text(hjust = 0.5)) +
+  guides(color = "none")
 
 df_fdoor_iv_null_all
-ggsave("frontdoor_iv_null_all.png", path =  paste0(prefix, "plots/"),
-       width = 20, height = 15, units = "cm")
+ggsave("v2.frontdoor_iv_null_all.png", path =  paste0(prefix, "plots/"),
+       width = 15, height = 15, units = "cm")
 
 # UNDER THE ALTERNATIVE
 df_fdoor_iv_alt_all <- df_fdoor_iv %>% filter(hypothesis == "A") %>% 
   mutate(nonzero_functionals = ifelse(frontdoor_true_functional == 1 & iv_true_functional == 1, TRUE, FALSE)) %>% 
   ggplot(., aes(x = sample_size, y = power, color = model_status, linetype = nonzero_functionals)) + 
   geom_line() +
-  labs(x = "Sample Size", y = "True Positive Rate",
-       title= "Frontdoor + IV, Under the Alternative",
-       color = "Assumption Violation Status",
-       linetype = "Non-Zero Functional In Wrong Model") +
-  scale_x_continuous(breaks=c(250, 500, 750, 1000)) +
-  theme(legend.position = c(.95, .1),
-        legend.justification = c("right", "bottom"),
-        legend.box.just = "bottom",
-        legend.margin = margin(6, 6, 6, 6),
-        legend.text = element_text(size = 7),
-        legend.title = element_text(size = 8),
-        legend.box = "horizontal",
-        plot.title = element_text(hjust = 0.5)) + 
-  guides(linetype = guide_legend(order = 1),
-         col = guide_legend(order = 2))
+  ggh4x::facet_nested("IV" + iv ~ "Frontdoor" + frontdoor) +
+  labs(x = "Sample Size", y = "Power",
+       title= "Frontdoor + IV, Under the Alternative (\u03b1 = 0.05)",
+       linetype = "Non-Zero Identified Functional In Wrong Model",
+       caption = "Note: colors represent violations of different assumptions in the wrong model") +
+  scale_x_continuous(breaks=c(250, 500, 750, 1000)) + 
+  theme(legend.position="bottom",
+        plot.title = element_text(hjust = 0.5)) +
+  guides(color = "none")
 
 
 df_fdoor_iv_alt_all
-ggsave("frontdoor_iv_alternative_all.png", path =  paste0(prefix, "plots/"),
-       width = 20, height = 15, units = "cm")
-
-
+ggsave("v2.frontdoor_iv_alternative_all.png", path =  paste0(prefix, "plots/"),
+       width = 15, height = 15, units = "cm")
 
 

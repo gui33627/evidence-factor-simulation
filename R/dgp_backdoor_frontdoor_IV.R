@@ -46,10 +46,9 @@ dgp_backdoor_frontdoor_iv_all_correct <- function(n, beta = 3) {
   M <- ifelse(Z == 1, M1, M0) # Z affects M only through A
   
   # potential outcomes of Y (not a function of A, (F1) satisfied; not a function directly of Z, (I2) satisfied)
-  muY1.MAUCZ <- beta*M1 + U + 2* sqrt(abs(C[,1])) + sin(C[,4])
-  muY0.MAUCZ <- beta*M0 + U + 2* sqrt(abs(C[,1])) + sin(C[,4])
-  Y1 <- rnorm(n, mean = muY1.MAUCZ)
-  Y0 <- rnorm(n, mean = muY0.MAUCZ)
+  error <- rnorm(n, mean = 0)
+  Y1 <- beta*M1 + 3*U + 2* sqrt(abs(C[,1])) + sin(C[,4]) + error
+  Y0 <- beta*M0 + 3*U + 2* sqrt(abs(C[,1])) + sin(C[,4]) + error
   Y <- ifelse(Z == 1, Y1, Y0) # Z affects Y only through A via M
   
   PO.diff.CACE <- Y1[idx_complier] - Y0[idx_complier]
@@ -100,19 +99,18 @@ dgp_backdoor_frontdoor_iv_i3_violated <- function(n, beta = 3) {
   A <- ifelse(Z == 1, A1, A0)
   
   # potential outcomes of mediator (not a function of U, so no unblocked backdoor path from M to Y given C, (F3) satisfied)
-  pM1.AUC <- expit(10 * A1 - 1 + C[,2]) # pM1.AUC and pM0.AUC are the same for never takers and always takers, exclusion restriction satisfied
-  pM0.AUC <- expit(10 * A0 - 1 + C[,2])
-  pM1.AUC[idx_defier] <- expit(1 * A1[idx_defier] - 1 + C[,2][idx_defier])
-  pM0.AUC[idx_defier] <- expit(1 * A0[idx_defier] - 1 + C[,2][idx_defier])
+  pM1.AUC <- expit(5 * A1 - 1 + C[,2]) # pM1.AUC and pM0.AUC are the same for never takers and always takers, exclusion restriction satisfied
+  pM0.AUC <- expit(5 * A0 - 1 + C[,2])
+  pM1.AUC[idx_defier] <- expit(5 * A1[idx_defier] - 1 + C[,2][idx_defier])
+  pM0.AUC[idx_defier] <- expit(5 * A0[idx_defier] - 1 + C[,2][idx_defier])
   M1 <- rbinom(n, size = 1, prob = pM1.AUC) 
   M0 <- rbinom(n, size = 1, prob = pM0.AUC)
   M <- ifelse(Z == 1, M1, M0) # Z affects M only through A
   
   # potential outcomes of Y (not a function of A, (F1) satisfied; not a function directly of Z, (I2) satisfied)
-  muY1.MAUCZ <- beta*M1 + U + 2* sqrt(abs(C[,1])) + sin(C[,4])
-  muY0.MAUCZ <- beta*M0 + U + 2* sqrt(abs(C[,1])) + sin(C[,4])
-  Y1 <- rnorm(n, mean = muY1.MAUCZ)
-  Y0 <- rnorm(n, mean = muY0.MAUCZ)
+  error <- rnorm(n, mean = 0)
+  Y1 <- beta*M1 + U + 2* sqrt(abs(C[,1])) + sin(C[,4]) + error
+  Y0 <- beta*M0 + U + 2* sqrt(abs(C[,1])) + sin(C[,4]) + error
   Y <- ifelse(Z == 1, Y1, Y0) # Z affects Y only through A via M
   
   PO.diff.CACE <- Y1[idx_complier] - Y0[idx_complier]
@@ -120,57 +118,6 @@ dgp_backdoor_frontdoor_iv_i3_violated <- function(n, beta = 3) {
   return(list(df = data.frame(Y, Z, M, A, C), idx_complier = idx_complier, CACE =  mean(PO.diff.CACE)))
 }
 
-
-dgp_backdoor_frontdoor_iv_i4_violated <- function(n, beta = 3) {
-  
-  # Unmeasured confounder
-  U <- matrix(runif(n, min=-2,max=2))
-  
-  # Measured confounders (not a descendant of A, (B2) satisfied)
-  C <- data.frame(matrix(runif(n * 4, min=-2,max=2), ncol=4))
-  
-  # Instrumental variable (randomized, (I1) satisfied)
-  Z <- rbinom(n = n, size = 1, prob = 0.5)
-  
-  # Treatment (not a function of U, (B1) satisfied; there is no unblocked backdoor path from A to M given C, (F2) satisfied)
-  pA.UC <- expit(C[,1] + expit(C[,2]) + sin(C[,3]))
-  A1 <- rbinom(n, size = 1, prob = pA.UC)
-  A0 <- rbinom(n, size = 1, prob = 1-pA.UC)
-  
-  # no defier, convert to compliers ((I3) satisfied)
-  A1[which(A1 == 0 & A0 == 1)] <- 1
-  A0[which(A1 == 0 & A0 == 1)] <- 0
-  
-  idx_complier <- which(A1 == 1 & A0 == 0)
-  idx_never <- which(A1 == 0 & A0 == 0)
-  idx_always <- which(A1 == 1 & A0 == 1)
-  # A is randomized, no connection with Z ((I4) violated)
-  A <- A1
-  
-  # Mediator (not a function of U, so no unblocked backdoor path from M to Y given C, (F3) satisfied)
-  pM.AUC <- expit(5 * A - 1 + C[,2])
-  M <- rbinom(n, size = 1, prob = pM.AUC) 
-  
-  # Outcome (not a function of A, (F1) satisfied; M and Y are not functions of Z, (I2) satisfied)
-  muY.MAUCZ <- beta*M + U + 2* sqrt(abs(C[,1])) + sin(C[,4])
-  Y <- rnorm(n, mean = muY.MAUCZ) 
-  
-  # potential outcomes of mediator 
-  pM1.AUC <- expit(5 * 1 - 1 + C[,2]) 
-  pM0.AUC <- expit(5 * 0 - 1 + C[,2])
-  M1 <- rbinom(n, size = 1, prob = pM1.AUC) 
-  M0 <- rbinom(n, size = 1, prob = pM0.AUC)
-  
-  # potential outcomes of Y 
-  muY1.MAUCZ <- beta*M1 + U + 2* sqrt(abs(C[,1])) + sin(C[,4])
-  muY0.MAUCZ <- beta*M0 + U + 2* sqrt(abs(C[,1])) + sin(C[,4])
-  Y1 <- rnorm(n, mean = muY1.MAUCZ)
-  Y0 <- rnorm(n, mean = muY0.MAUCZ)
-  
-  PO.diff.CACE <- Y1[idx_complier] - Y0[idx_complier]
-  
-  return(list(df = data.frame(Y, Z, M, A, C), idx_complier = idx_complier, CACE =  mean(PO.diff.CACE)))
-}
 
 
 # 3. Backdoor and IV assumptions satisfied, but front-door criterion violated
@@ -180,54 +127,6 @@ dgp_backdoor_frontdoor_iv_i4_violated <- function(n, beta = 3) {
 #                              violating the backdoor criteria, *so the simulation 
 #                              is not going to violate (I2)*
 # Violate the assumption (F3): there is an unblocked backdoor path from M to Y
-
-
-dgp_backdoor_frontdoor_iv_f1_violated <- function(n, beta = 1.5) {
-  
-  # Unmeasured confounder
-  U <- matrix(runif(n, min=-2,max=2))
-  
-  # Measured confounders (not a descendant of A, (B2) satisfied)
-  C <- data.frame(matrix(runif(n * 4, min=-2,max=2), ncol=4))
-  
-  # Instrumental variable (randomized, (I1) satisfied)
-  Z <- rbinom(n = n, size = 1, prob = 0.5)
-  
-  # Treatment (not a function of U, (B1) satisfied; there is no unblocked backdoor path from A to M given C, (F2) satisfied)
-  pA.UC <- expit(C[,1] + expit(C[,2]) + sin(C[,3]))
-  A1 <- rbinom(n, size = 1, prob = pA.UC)
-  A0 <- rbinom(n, size = 1, prob = 1-pA.UC)
-  
-  # no defier, convert to compliers ((I3) satisfied)
-  A1[which(A1 == 0 & A0 == 1)] <- 1
-  A0[which(A1 == 0 & A0 == 1)] <- 0
-  
-  idx_complier <- which(A1 == 1 & A0 == 0)
-  idx_never <- which(A1 == 0 & A0 == 0)
-  idx_always <- which(A1 == 1 & A0 == 1)
-  #  A is determined by Z based on the four types of people, (I4) satisfied
-  A <- ifelse(Z == 1, A1, A0)
-  
-  # potential outcomes of mediator (not a function of U, so no unblocked backdoor path from M to Y given C, (F3) satisfied)
-  pM1.AUC <- expit(5 * A1 - 1 + C[,2]) # pM1.AUC and pM0.AUC are the same for never takers and always takers, exclusion restriction satisfied
-  pM0.AUC <- expit(5 * A0 - 1 + C[,2])
-  M1 <- rbinom(n, size = 1, prob = pM1.AUC) 
-  M0 <- rbinom(n, size = 1, prob = pM0.AUC)
-  M <- ifelse(Z == 1, M1, M0) # Z affects M only through A
-  
-  # potential outcomes of Y (a function of A, so there is a direct A->Y, (F1) violated; not a function directly of Z, (I2) satisfied)
-  muY1.MAUCZ <- beta*A1 + U + 2* sqrt(abs(C[,1])) + sin(C[,4])
-  muY0.MAUCZ <- beta*A0 + U + 2* sqrt(abs(C[,1])) + sin(C[,4])
-  Y1 <- rnorm(n, mean = muY1.MAUCZ)
-  Y0 <- rnorm(n, mean = muY0.MAUCZ)
-  Y <- ifelse(Z == 1, Y1, Y0) # Z affects Y only through A 
-  
-  PO.diff.CACE <- Y1[idx_complier] - Y0[idx_complier]
-  
-  
-  return(list(df = data.frame(Y, Z, M, A, C), idx_complier = idx_complier, CACE =  mean(PO.diff.CACE)))
-}
-
 
 dgp_backdoor_frontdoor_iv_f3_violated <- function(n, beta = 1.5) {
   
@@ -263,10 +162,9 @@ dgp_backdoor_frontdoor_iv_f3_violated <- function(n, beta = 1.5) {
   M <- ifelse(Z == 1, M1, M0) # Z affects M only through A
   
   # potential outcomes of Y (not a function of A, (F1) satisfied; not a function directly of Z, (I2) satisfied)
-  muY1.MAUCZ <- beta*M1 + U + 2* sqrt(abs(C[,1])) + sin(C[,4])
-  muY0.MAUCZ <- beta*M0 + U + 2* sqrt(abs(C[,1])) + sin(C[,4])
-  Y1 <- rnorm(n, mean = muY1.MAUCZ)
-  Y0 <- rnorm(n, mean = muY0.MAUCZ)
+  error <- rnorm(n, mean = 0)
+  Y1 <- beta*M1 + 3*U + 2* sqrt(abs(C[,1])) + sin(C[,4]) + error
+  Y0 <- beta*M0 + 3*U + 2* sqrt(abs(C[,1])) + sin(C[,4]) + error
   Y <- ifelse(Z == 1, Y1, Y0) # Z affects Y only through A via M
   
   PO.diff.CACE <- Y1[idx_complier] - Y0[idx_complier]
@@ -320,18 +218,15 @@ dgp_backdoor_frontdoor_iv_b1_violated <- function(n, beta = 3) {
   M <- ifelse(Z == 1, M1, M0) # Z affects M only through A
   
   # potential outcomes of Y (not a function of A, (F1) satisfied; not a function directly of Z, (I2) satisfied)
-  muY1.MAUCZ <- beta*M1 + U + 2* sqrt(abs(C[,1])) + sin(C[,4])
-  muY0.MAUCZ <- beta*M0 + U + 2* sqrt(abs(C[,1])) + sin(C[,4])
-  Y1 <- rnorm(n, mean = muY1.MAUCZ)
-  Y0 <- rnorm(n, mean = muY0.MAUCZ)
+  error <- rnorm(n, mean = 0)
+  Y1 <- beta*M1 + 3*U + 2* sqrt(abs(C[,1])) + sin(C[,4]) + error
+  Y0 <- beta*M0 + 3*U + 2* sqrt(abs(C[,1])) + sin(C[,4]) + error
   Y <- ifelse(Z == 1, Y1, Y0) # Z affects Y only through A via M
   
   PO.diff.CACE <- Y1[idx_complier] - Y0[idx_complier]
   
   return(list(df = data.frame(Y, Z, M, A, C), idx_complier = idx_complier, CACE =  mean(PO.diff.CACE)))
 }
-
-
 
 
 
@@ -347,7 +242,7 @@ dgp_backdoor_frontdoor_iv_b1_violated <- function(n, beta = 3) {
 #                              *so the simulation is not going to violate (F2)*
 # Violate the assumption (F3): there is a unblocked backdoor path from M to Y
 
-dgp_backdoor_frontdoor_iv_bdoor_correct_f1i3_violated <- function(n, beta = 1.5, beta_defier = 0.5) {
+dgp_backdoor_frontdoor_iv_bdoor_correct_f1i3_violated <- function(n, beta = 1.5) {
   
   # Unmeasured confounder
   U <- matrix(runif(n, min=-2,max=2))
@@ -373,21 +268,20 @@ dgp_backdoor_frontdoor_iv_bdoor_correct_f1i3_violated <- function(n, beta = 1.5,
   A <- ifelse(Z == 1, A1, A0)
   
   # potential outcomes of mediator (not a function of U, so no unblocked backdoor path from M to Y given C, (F3) satisfied)
-  pM1.AUC <- expit(10 * A1 - 1 + C[,2]) # pM1.AUC and pM0.AUC are the same for never takers and always takers, exclusion restriction satisfied
-  pM0.AUC <- expit(10 * A0 - 1 + C[,2])
-  pM1.AUC[idx_defier] <- expit(1 * A1[idx_defier] - 1 + C[,2][idx_defier])
-  pM0.AUC[idx_defier] <- expit(1 * A0[idx_defier] - 1 + C[,2][idx_defier])
+  pM1.AUC <- expit(5 * A1 - 1 + C[,2]) # pM1.AUC and pM0.AUC are the same for never takers and always takers, exclusion restriction satisfied
+  pM0.AUC <- expit(5 * A0 - 1 + C[,2])
+  pM1.AUC[idx_defier] <- expit(5 * A1[idx_defier] - 1 + C[,2][idx_defier])
+  pM0.AUC[idx_defier] <- expit(5 * A0[idx_defier] - 1 + C[,2][idx_defier])
   M1 <- rbinom(n, size = 1, prob = pM1.AUC) 
   M0 <- rbinom(n, size = 1, prob = pM0.AUC)
   M <- ifelse(Z == 1, M1, M0) # Z affects M only through A
   
   # potential outcomes of Y (a function of A, so there is a direct A->Y, (F1) violated; not a function directly of Z, (I2) satisfied)
-  muY1.MAUCZ <- beta*A1 + U + 2* sqrt(abs(C[,1])) + sin(C[,4])
-  muY0.MAUCZ <- beta*A0 + U + 2* sqrt(abs(C[,1])) + sin(C[,4])
-  muY1.MAUCZ[idx_defier] <- beta_defier*A1[idx_defier] + U[idx_defier] + 2* sqrt(abs(C[,1][idx_defier])) + sin(C[,4][idx_defier])
-  muY0.MAUCZ[idx_defier] <- beta_defier*A0[idx_defier] + U[idx_defier] + 2* sqrt(abs(C[,1][idx_defier])) + sin(C[,4][idx_defier])
-  Y1 <- rnorm(n, mean = muY1.MAUCZ)
-  Y0 <- rnorm(n, mean = muY0.MAUCZ)
+  error <- rnorm(n, mean = 0)
+  Y1 <- beta*A1 + 3*U + 2* sqrt(abs(C[,1])) + sin(C[,4]) + error
+  Y0 <- beta*A0 + 3*U + 2* sqrt(abs(C[,1])) + sin(C[,4]) + error
+  Y1[idx_defier] <- beta*A1[idx_defier] + 3*U[idx_defier] + 2* sqrt(abs(C[,1][idx_defier])) + sin(C[,4][idx_defier]) + error[idx_defier]
+  Y0[idx_defier] <- beta*A0[idx_defier] + 3*U[idx_defier] + 2* sqrt(abs(C[,1][idx_defier])) + sin(C[,4][idx_defier]) + error[idx_defier]
   Y <- ifelse(Z == 1, Y1, Y0) # Z affects Y only through A 
   
   PO.diff.CACE <- Y1[idx_complier] - Y0[idx_complier]
@@ -423,19 +317,18 @@ dgp_backdoor_frontdoor_iv_bdoor_correct_f3i3_violated <- function(n, beta = 3) {
   A <- ifelse(Z == 1, A1, A0)
   
   # potential outcomes of mediator (a function of U, so there is an unblocked backdoor path from M to Y given C, (F3) violated)
-  pM1.AUC <- expit(10 * A1 - 1 + C[,2] + U) # pM1.AUC and pM0.AUC are the same for never takers and always takers, exclusion restriction satisfied
-  pM0.AUC <- expit(10 * A0 - 1 + C[,2] + U)
-  pM1.AUC[idx_defier] <- expit(1 * A1[idx_defier] - 1 + C[,2][idx_defier] + U[idx_defier])
-  pM0.AUC[idx_defier] <- expit(1 * A0[idx_defier] - 1 + C[,2][idx_defier] + U[idx_defier])
+  pM1.AUC <- expit(2 * A1 - 1 + C[,2] + U) # pM1.AUC and pM0.AUC are the same for never takers and always takers, exclusion restriction satisfied
+  pM0.AUC <- expit(2 * A0 - 1 + C[,2] + U)
+  pM1.AUC[idx_defier] <- expit(2 * A1[idx_defier] - 1 + C[,2][idx_defier] + U[idx_defier])
+  pM0.AUC[idx_defier] <- expit(2 * A0[idx_defier] - 1 + C[,2][idx_defier] + U[idx_defier])
   M1 <- rbinom(n, size = 1, prob = pM1.AUC) 
   M0 <- rbinom(n, size = 1, prob = pM0.AUC)
   M <- ifelse(Z == 1, M1, M0) # Z affects M only through A
   
   # potential outcomes of Y (not a function of A, (F1) satisfied; not a function directly of Z, (I2) satisfied)
-  muY1.MAUCZ <- beta*M1 + U + 2* sqrt(abs(C[,1])) + sin(C[,4])
-  muY0.MAUCZ <- beta*M0 + U + 2* sqrt(abs(C[,1])) + sin(C[,4])
-  Y1 <- rnorm(n, mean = muY1.MAUCZ)
-  Y0 <- rnorm(n, mean = muY0.MAUCZ)
+  error <- rnorm(n, mean = 0)
+  Y1 <- beta*M1 + U + 2* sqrt(abs(C[,1])) + sin(C[,4]) + error
+  Y0 <- beta*M0 + U + 2* sqrt(abs(C[,1])) + sin(C[,4]) + error
   Y <- ifelse(Z == 1, Y1, Y0) # Z affects Y only through A via M
   
   PO.diff.CACE <- Y1[idx_complier] - Y0[idx_complier]
@@ -467,7 +360,7 @@ dgp_backdoor_frontdoor_iv_fdoor_correct_b1i1_violated <- function(n, beta = 3) {
   C <- data.frame(matrix(runif(n * 4, min=-2,max=2), ncol=4))
   
   # Instrumental variable (a function of U, (I1) violated)
-  pZ.C <- expit(2 + U)
+  pZ.C <- expit(2 + 2*U)
   Z <- rbinom(n = n, size = 1, prob = pZ.C)
   
   # Treatment (a function of U1, there is an unblocked backdoor path from A and Y, (B1) violated)
@@ -486,17 +379,16 @@ dgp_backdoor_frontdoor_iv_fdoor_correct_b1i1_violated <- function(n, beta = 3) {
   A <- ifelse(Z == 1, A1, A0)
   
   # potential outcomes of mediator (not a function of U, so no unblocked backdoor path from A to M given C, (F2) satisfied; no unblocked backdoor path from M to Y given C, (F3) satisfied)
-  pM1.AUC <- expit(5 * A1 - 1 + C[,2]) # pM1.AUC and pM0.AUC are the same for never takers and always takers, exclusion restriction satisfied
-  pM0.AUC <- expit(5 * A0 - 1 + C[,2])
+  pM1.AUC <- expit(2 * A1 - 1 + C[,2]) # pM1.AUC and pM0.AUC are the same for never takers and always takers, exclusion restriction satisfied
+  pM0.AUC <- expit(2 * A0 - 1 + C[,2])
   M1 <- rbinom(n, size = 1, prob = pM1.AUC) 
   M0 <- rbinom(n, size = 1, prob = pM0.AUC)
   M <- ifelse(Z == 1, M1, M0) # Z affects M only through A
   
   # potential outcomes of Y (not a function of A, (F1) satisfied; not a function directly of Z, (I2) satisfied)
-  muY1.MAUCZ <- beta*M1 + U + U1 + 2* sqrt(abs(C[,1])) + sin(C[,4])
-  muY0.MAUCZ <- beta*M0 + U + U1 + 2* sqrt(abs(C[,1])) + sin(C[,4])
-  Y1 <- rnorm(n, mean = muY1.MAUCZ)
-  Y0 <- rnorm(n, mean = muY0.MAUCZ)
+  error <- rnorm(n, mean = 0)
+  Y1 <- beta*M1 + 2*U + U1 + 2* sqrt(abs(C[,1])) + sin(C[,4]) + error
+  Y0 <- beta*M0 + 2*U + U1 + 2* sqrt(abs(C[,1])) + sin(C[,4]) + error
   Y <- ifelse(Z == 1, Y1, Y0) # Z affects Y only through A via M
   
   PO.diff.CACE <- Y1[idx_complier] - Y0[idx_complier]
@@ -532,17 +424,16 @@ dgp_backdoor_frontdoor_iv_fdoor_correct_b1i2_violated <- function(n, beta = 3) {
   A <- ifelse(Z == 1, A1, A0)
   
   # potential outcomes of mediator (not a function of U, so no unblocked backdoor path from A to M given C, (F2) satisfied; no unblocked backdoor path from M to Y given C, (F3) satisfied)
-  pM1.AUC <- expit(5 * A1 - 1 + C[,2]) # pM1.AUC and pM0.AUC are the same for never takers and always takers, exclusion restriction satisfied
-  pM0.AUC <- expit(5 * A0 - 1 + C[,2])
+  pM1.AUC <- expit(2 * A1 - 1 + C[,2]) # pM1.AUC and pM0.AUC are the same for never takers and always takers, exclusion restriction satisfied
+  pM0.AUC <- expit(2 * A0 - 1 + C[,2])
   M1 <- rbinom(n, size = 1, prob = pM1.AUC) 
   M0 <- rbinom(n, size = 1, prob = pM0.AUC)
   M <- ifelse(Z == 1, M1, M0) # Z affects M only through A
   
   # potential outcomes of Y (not a function of A, (F1) satisfied; a function of Z, (I2) violated)
-  muY1.MAUCZ <- beta*M1 + U + 2* sqrt(abs(C[,1])) + sin(C[,4]) + 2*Z
-  muY0.MAUCZ <- beta*M0 + U + 2* sqrt(abs(C[,1])) + sin(C[,4]) + 2*Z
-  Y1 <- rnorm(n, mean = muY1.MAUCZ)
-  Y0 <- rnorm(n, mean = muY0.MAUCZ)
+  error <- rnorm(n, mean = 0)
+  Y1 <- beta*M1 + 3*U + 2* sqrt(abs(C[,1])) + sin(C[,4]) + 2*Z + error
+  Y0 <- beta*M0 + 3*U + 2* sqrt(abs(C[,1])) + sin(C[,4]) + 2*Z + error
   Y <- ifelse(Z == 1, Y1, Y0) # Z affects Y only through A via M
   
   PO.diff.CACE <- Y1[idx_complier] - Y0[idx_complier]
@@ -588,66 +479,17 @@ dgp_backdoor_frontdoor_iv_iv_correct_b1f2f3_violated <- function(n, beta = 3) {
   A <- ifelse(Z == 1, A1, A0)
   
   # potential outcomes of mediator (a function of U, so there is an unblocked backdoor path from M to Y given C, (F3) violated)
-  pM1.AUC <- expit(5 * A1 - 1 + C[,2] + U) # pM1.AUC and pM0.AUC are the same for never takers and always takers, exclusion restriction satisfied
-  pM0.AUC <- expit(5 * A0 - 1 + C[,2] + U)
+  pM1.AUC <- expit(3 * A1 - 1 + C[,2] + U) # pM1.AUC and pM0.AUC are the same for never takers and always takers, exclusion restriction satisfied
+  pM0.AUC <- expit(3 * A0 - 1 + C[,2] + U)
   M1 <- rbinom(n, size = 1, prob = pM1.AUC) 
   M0 <- rbinom(n, size = 1, prob = pM0.AUC)
   M <- ifelse(Z == 1, M1, M0) # Z affects M only through A
   
   # potential outcomes of Y (not a function of A, (F1) satisfied; not a function directly of Z, (I2) satisfied)
-  muY1.MAUCZ <- beta*M1 + U + 2* sqrt(abs(C[,1])) + sin(C[,4])
-  muY0.MAUCZ <- beta*M0 + U + 2* sqrt(abs(C[,1])) + sin(C[,4])
-  Y1 <- rnorm(n, mean = muY1.MAUCZ)
-  Y0 <- rnorm(n, mean = muY0.MAUCZ)
+  error <- rnorm(n, mean = 0)
+  Y1 <- beta*M1 + 3*U + 2* sqrt(abs(C[,1])) + sin(C[,4]) + error
+  Y0 <- beta*M0 + 3*U + 2* sqrt(abs(C[,1])) + sin(C[,4]) + error
   Y <- ifelse(Z == 1, Y1, Y0) # Z affects Y only through A via M
-  
-  PO.diff.CACE <- Y1[idx_complier] - Y0[idx_complier]
-  
-  return(list(df = data.frame(Y, Z, M, A, C), idx_complier = idx_complier, CACE =  mean(PO.diff.CACE)))
-}
-
-dgp_backdoor_frontdoor_iv_iv_correct_b2f1f3_violated <- function(n, beta = 3) {
-  
-  # Unmeasured confounder
-  U <- matrix(runif(n, min=-2,max=2))
-  
-  # Measured confounders 
-  C <- data.frame(matrix(runif(n * 4, min=-2,max=2), ncol=4))
-  
-  # Instrumental variable (randomized, (I1) satisfied)
-  Z <- rbinom(n = n, size = 1, prob = 0.5)
-  
-  # Treatment (a function not of U, (B1) satisfied; there is no unblocked backdoor path from A to M given C, (F2) satisfied)
-  pA.UC <- expit(C[,4] + expit(C[,2]) + sin(C[,3]))
-  A1 <- rbinom(n, size = 1, prob = pA.UC)
-  A0 <- rbinom(n, size = 1, prob = 1-pA.UC)
-  
-  # no defier, convert to compliers ((I3) satisfied)
-  A1[which(A1 == 0 & A0 == 1)] <- 1
-  A0[which(A1 == 0 & A0 == 1)] <- 0
-  
-  idx_complier <- which(A1 == 1 & A0 == 0)
-  idx_never <- which(A1 == 0 & A0 == 0)
-  idx_always <- which(A1 == 1 & A0 == 1)
-  #  A is determined by Z based on the four types of people, (I4) satisfied
-  A <- ifelse(Z == 1, A1, A0)
-  
-  # potential outcomes of mediator (a function of U, so there is an unblocked backdoor path from M to Y given C, (F3) violated)
-  pM1.AUC <- expit(5 * A1 - 1 + C[,2] + U) # pM1.AUC and pM0.AUC are the same for never takers and always takers, exclusion restriction satisfied
-  pM0.AUC <- expit(5 * A0 - 1 + C[,2] + U)
-  M1 <- rbinom(n, size = 1, prob = pM1.AUC) 
-  M0 <- rbinom(n, size = 1, prob = pM0.AUC)
-  M <- ifelse(Z == 1, M1, M0) # Z affects M only through A
-  
-  # potential outcomes of Y (not a function of A, (F1) satisfied; not a function directly of Z, (I2) satisfied)
-  muY1.MAUCZ <- beta*M1 + U + sin(C[,4])
-  muY0.MAUCZ <- beta*M0 + U + sin(C[,4])
-  Y1 <- rnorm(n, mean = muY1.MAUCZ)
-  Y0 <- rnorm(n, mean = muY0.MAUCZ)
-  Y <- ifelse(Z == 1, Y1, Y0) # Z affects Y only through A via M
-  
-  # Measured confounders (a node in C is a collider, (B2) violated)
-  C[,1] <- rnorm(n, mean = (A + Y))
   
   PO.diff.CACE <- Y1[idx_complier] - Y0[idx_complier]
   
@@ -689,10 +531,9 @@ dgp_backdoor_frontdoor_iv_iv_correct_b2f1f2_violated <- function(n, beta = 3) {
   M <- ifelse(Z == 1, M1, M0) # Z affects M only through A
   
   # potential outcomes of Y (not a function of A, (F1) satisfied; not a function directly of Z, (I2) satisfied)
-  muY1.MAUCZ <- beta*M1 + sin(C[,4])
-  muY0.MAUCZ <- beta*M0 + sin(C[,4])
-  Y1 <- rnorm(n, mean = muY1.MAUCZ)
-  Y0 <- rnorm(n, mean = muY0.MAUCZ)
+  error <- rnorm(n, mean = 0)
+  Y1 <- beta*M1 + sin(C[,4]) + error
+  Y0 <- beta*M0 + sin(C[,4]) + error
   Y <- ifelse(Z == 1, Y1, Y0) # Z affects Y only through A via M
   
   # Measured confounders (a node in C is a collider, (B2) violated)

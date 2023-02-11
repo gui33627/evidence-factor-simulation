@@ -25,7 +25,7 @@ dgp_backdoor_frontdoor_both_correct <- function(n, beta = 3) {
   M <- rbinom(n, size = 1, prob = pM.AUC) 
   
   # Outcome (not a function of A, (F1) satisfied)
-  muY.MAUC <- beta*M + U + 2* sqrt(abs(C[,1])) + sin(C[,4])
+  muY.MAUC <- beta*M + 2*U + 2* sqrt(abs(C[,1])) + sin(C[,4])
   Y <- rnorm(n, mean = muY.MAUC) 
   
   # also create a column for finding true causal effect
@@ -35,8 +35,8 @@ dgp_backdoor_frontdoor_both_correct <- function(n, beta = 3) {
   M1 <- rbinom(n, size = 1, prob = pM1.AUC) 
   M0 <- rbinom(n, size = 1, prob = pM0.AUC)
   # potential outcomes of Y
-  muY1.MAUC <- beta*M1 + U + 2* sqrt(abs(C[,1])) + sin(C[,4])
-  muY0.MAUC <- beta*M0 + U + 2* sqrt(abs(C[,1])) + sin(C[,4])
+  muY1.MAUC <- beta*M1 + 2*U + 2* sqrt(abs(C[,1])) + sin(C[,4])
+  muY0.MAUC <- beta*M0 + 2*U + 2* sqrt(abs(C[,1])) + sin(C[,4])
   Y1 <- rnorm(n, mean = muY1.MAUC)
   Y0 <- rnorm(n, mean = muY0.MAUC)
   PO.diff <- Y1 - Y0
@@ -72,13 +72,13 @@ dgp_backdoor_frontdoor_bdoor_correct_f1_violated <- function(n, beta = 1.5) {
   M <- rbinom(n, size = 1, prob = pM.AUC)
   
   # Outcome (a function of A, (F1) violated)
-  muY.MAUC <- beta*A + U - 2* sqrt(abs(C[,1])) + sin(C[,4])
+  muY.MAUC <- beta*A + 2*U + 2* sqrt(abs(C[,1])) + sin(C[,4])
   Y <- rnorm(n, mean = muY.MAUC)
   
   # also create a column for finding true causal effect
   # potential outcomes of Y
-  muY1.MAUC <- beta*1 + U - 2* sqrt(abs(C[,1])) + sin(C[,4]) 
-  muY0.MAUC <- beta*0 + U - 2* sqrt(abs(C[,1])) + sin(C[,4]) 
+  muY1.MAUC <- beta*1 + 2*U + 2* sqrt(abs(C[,1])) + sin(C[,4]) 
+  muY0.MAUC <- beta*0 + 2*U + 2* sqrt(abs(C[,1])) + sin(C[,4]) 
   Y1 <- rnorm(n, mean = muY1.MAUC)
   Y0 <- rnorm(n, mean = muY0.MAUC)
   PO.diff <- Y1 - Y0
@@ -101,21 +101,21 @@ dgp_backdoor_frontdoor_bdoor_correct_f3_violated <- function(n, beta = 3) {
   A <- rbinom(n, size = 1, prob = pA.UC)
   
   # Mediator (a function of U, so there is an unblocked backdoor path M to Y, (F3) violated)
-  pM.AUC <- expit(5 * A - 1 + C[,2] + U) 
+  pM.AUC <- expit(2 * A - 1 + C[,2] + U) 
   M <- rbinom(n, size = 1, prob = pM.AUC)
   
   # Outcome (not a function of A, (F1) satisfied)
-  muY.MAUC <- beta*M + U + 2* sqrt(abs(C[,1])) + sin(C[,4])
+  muY.MAUC <- beta*M + 2*U + 2* sqrt(abs(C[,1])) + sin(C[,4])
   Y <- rnorm(n, mean = muY.MAUC)
   
   # potential outcomes of M
-  pM1.AUC <- expit(5 * 1 - 1 + C[,2] + U)
-  pM0.AUC <- expit(5 * 0 - 1 + C[,2] + U)
+  pM1.AUC <- expit(2 * 1 - 1 + C[,2] + U)
+  pM0.AUC <- expit(2 * 0 - 1 + C[,2] + U)
   M1 <- rbinom(n, size = 1, prob = pM1.AUC) 
   M0 <- rbinom(n, size = 1, prob = pM0.AUC)
   # potential outcomes of Y
-  muY1.MAUC <- beta*M1 + U + 2* sqrt(abs(C[,1])) + sin(C[,4])
-  muY0.MAUC <- beta*M0 + U + 2* sqrt(abs(C[,1])) + sin(C[,4])
+  muY1.MAUC <- beta*M1 + 2*U + 2* sqrt(abs(C[,1])) + sin(C[,4])
+  muY0.MAUC <- beta*M0 + 2*U + 2* sqrt(abs(C[,1])) + sin(C[,4])
   Y1 <- rnorm(n, mean = muY1.MAUC)
   Y0 <- rnorm(n, mean = muY0.MAUC)
   PO.diff <- Y1 - Y0
@@ -145,22 +145,22 @@ dgp_backdoor_frontdoor_fdoor_correct_b1_violated <- function(n, beta = 3) {
   A <- rbinom(n, size = 1, prob = pA.UC) 
   
   # Mediator (not a function of U, so no unblocked backdoor path from M to Y given C, (F3) satisfied)
-  pM.AUC <- expit(5 * A - 1 + C[,2])
+  pM.AUC <- expit(2 * A - 1 + C[,2])
   M <- rbinom(n, size = 1, prob = pM.AUC) 
   
   # Outcome (not a function of A, (F1) satisfied)
-  muY.MAUC <- beta*M + U + 2* sqrt(abs(C[,1])) + sin(C[,4])
+  muY.MAUC <- beta*M + 2*U + 2* sqrt(abs(C[,1])) + sin(C[,4])
   Y <- rnorm(n, mean = muY.MAUC) 
   
   # also create a column for finding true causal effect
   # potential outcomes of M
-  pM1.AUC <- expit(5 * 1 - 1 + C[,2])
-  pM0.AUC <- expit(5 * 0 - 1 + C[,2])
+  pM1.AUC <- expit(2 * 1 - 1 + C[,2])
+  pM0.AUC <- expit(2 * 0 - 1 + C[,2])
   M1 <- rbinom(n, size = 1, prob = pM1.AUC) 
   M0 <- rbinom(n, size = 1, prob = pM0.AUC)
   # potential outcomes of Y
-  muY1.MAUC <- beta*M1 + U + 2* sqrt(abs(C[,1])) + sin(C[,4])
-  muY0.MAUC <- beta*M0 + U + 2* sqrt(abs(C[,1])) + sin(C[,4])
+  muY1.MAUC <- beta*M1 + 2*U + 2* sqrt(abs(C[,1])) + sin(C[,4])
+  muY0.MAUC <- beta*M0 + 2*U + 2* sqrt(abs(C[,1])) + sin(C[,4])
   Y1 <- rnorm(n, mean = muY1.MAUC)
   Y0 <- rnorm(n, mean = muY0.MAUC)
   PO.diff <- Y1 - Y0

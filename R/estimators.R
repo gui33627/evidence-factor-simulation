@@ -61,7 +61,7 @@ apipw <- function(A.model, M.model, Y.model, data) {
 }
 
 # instrumental variable
-uiv <- function(z.model, za.model, zy.model, data){
+uiv_v1 <- function(z.model, za.model, zy.model, data){
   
   Y <- data$Y; Z <- data$Z; A <- data$A
   pi.hats <- z.model$fitted.values
@@ -87,7 +87,26 @@ uiv <- function(z.model, za.model, zy.model, data){
 }  
   
   
+uiv <- function(data){
   
+  Y <- data$Y; Z <- data$Z; A <- data$A
+  pi.hats <- mean(Z)
+  # data$Z <- 0 ; mu.hats0 <- predict(zy.model, data); a.hats0 <- predict(za.model, data)
+  # data$Z <- 1 ; mu.hats1 <- predict(zy.model, data); a.hats1 <- predict(za.model, data)
+  # eif <-  (((Y - mu.hats1)*(a.hats1 - a.hats0) - (A - a.hats1)*(mu.hats1 - mu.hats0))*(Z/pi.hats)/(a.hats1 - a.hats0)^2
+  #          - ((Y - mu.hats0)*(a.hats1 - a.hats0) - (A - a.hats0)*(mu.hats1 - mu.hats0))*((1-Z)/(1-pi.hats))/(a.hats1 - a.hats0)^2)
+  
+  mu.hats0 <- mean(Y[Z == 0])
+  mu.hats1 <- mean(Y[Z == 1])
+  a.hats0 <- mean(A[Z == 0])
+  a.hats1 <- mean(A[Z == 1])
+
+  eif <- ((Z/pi.hats)*(Y - mu.hats1) + mu.hats1 - ((1-Z)/(1-pi.hats)*(Y - mu.hats0) + mu.hats0))/(a.hats1 - a.hats0)
+  - (mu.hats1 - mu.hats0)/(a.hats1 - a.hats0)^2*((Z/pi.hats)*(A - a.hats1) + a.hats1 - (((1-Z)/(1-pi.hats)*(A - a.hats0)) + a.hats0))
+  
+  return(eif)
+  
+}    
   
 
 

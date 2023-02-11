@@ -63,8 +63,6 @@ typeI <- sum(p_values_null_all_correct <= 0.05)/length(p_values_null_all_correct
 power <- typeI
 size <- power
 
-# [1] 0
-
 
 # write the result to the table
 backdoor_values = c(backdoor_values, TRUE)
@@ -124,7 +122,6 @@ typeI <- sum(p_values_null_backdoor_iv_correct_f3_violated <= 0.05)/length(p_val
 power <- typeI
 size <- power
 
-# [1] 0
 
 
 # write the result to the table
@@ -184,7 +181,6 @@ typeI <- sum(p_values_null_backdoor_frontdoor_correct_i3_violated <= 0.05)/lengt
 power <- typeI
 size <- power
 
-# [1] 0
 
 # write the result to the table
 backdoor_values = c(backdoor_values, TRUE)
@@ -243,7 +239,6 @@ typeI <- sum(p_values_null_fdoor_iv_correct_b1_violated <= 0.05)/length(p_values
 power <- typeI
 size <- power
 
-# [1] 0
 
 # write the result to the table
 backdoor_values = c(backdoor_values, FALSE)
@@ -265,7 +260,6 @@ hypothesis = c(hypothesis, "N")
 beta = c(beta, 0)
 size_values = c(size_values, size)
 power_values = c(power_values, NA)
-
 
 
 
@@ -304,8 +298,6 @@ typeI <- sum(p_values_null_fdoor_correct_b1i1_violated <= 0.05)/length(p_values_
 power <- typeI
 size <- power
 
-# [1] 0.088
-
 
 # write the result to the table
 backdoor_values = c(backdoor_values, FALSE)
@@ -327,8 +319,6 @@ hypothesis = c(hypothesis, "N")
 beta = c(beta, 0)
 size_values = c(size_values, size)
 power_values = c(power_values, NA)
-
-
 
 
 # c.2) iv is correct, backdoor and front door are wrong 
@@ -364,8 +354,6 @@ p_values_null_iv_correct_b1f2f3_violated <- foreach(i = 1:N, .combine = c) %dopa
 typeI <- sum(p_values_null_iv_correct_b1f2f3_violated <= 0.05)/length(p_values_null_iv_correct_b1f2f3_violated)
 power <- typeI
 size <- power
-
-# [1] 0.036
 
 
 # write the result to the table
@@ -425,8 +413,6 @@ p_values_null_bdoor_correct_f3i3_violated <- foreach(i = 1:N, .combine = c) %dop
 typeI <- sum(p_values_null_bdoor_correct_f3i3_violated <= 0.05)/length(p_values_null_bdoor_correct_f3i3_violated)
 power <- typeI
 size <- power
-
-# [1] 0
 
 
 # write the result to the table
@@ -615,117 +601,6 @@ f3 = c(f3, FALSE)
 i1 = c(i1, TRUE) 
 i2 = c(i2, TRUE) 
 i3 = c(i3, TRUE) 
-i4 = c(i4, TRUE) 
-hypothesis = c(hypothesis, "A")
-beta = c(beta, 10)
-size_values = c(size_values, NA)
-power_values = c(power_values, power)
-
-
-# a.3) backdoor is correct, front door and iv are wrong
-# f3 and i3 are violated
-p_values_alternative_bdoor_correct_f3i3_violated <- foreach(i = 1:N, .combine = c) %dopar% {
-  
-  df <- dgp_backdoor_frontdoor_iv_bdoor_correct_f3i3_violated(n = n, beta = 10)
-  data <- df$df
-  
-  # estimate using AIPW (backdoor IF)
-  backdoor <- estimate_backdooor(data)
-  backdoor.est <- backdoor$backdoor.est
-  backdoor.eif <- backdoor$backdoor.eif
-  
-  # estimate using APIPW (front door IF)
-  frontdoor <- estimate_frontdoor(data)
-  frontdoor.est <- frontdoor$frontdoor.est
-  frontdoor.eif <- frontdoor$frontdoor.eif
-  
-  # estimate using UIV (IV IF)
-  iv <- estimate_uiv(data)
-  iv.est <- iv$iv.est
-  iv.eif <- iv$iv.eif
-  
-  # Evidence factor
-  est <- c(backdoor.est, frontdoor.est, iv.est)
-  eif <- cbind(backdoor.eif, frontdoor.eif, iv.eif)
-  evidence_factor(est = est, eif = eif)
-
-}
-
-typeII <- sum(p_values_alternative_bdoor_correct_f3i3_violated > 0.05)/length(p_values_alternative_bdoor_correct_f3i3_violated)
-power <- 1-typeII
-
-# [1] 0.938
-
-# write the result to the table
-backdoor_values = c(backdoor_values, TRUE)
-frontdoor_values = c(frontdoor_values, FALSE)
-iv_values = c(iv_values, FALSE) 
-backdoor_true_functional = c(backdoor_true_functional, 1)
-frontdoor_true_functional = c(frontdoor_true_functional, 1)
-iv_true_functional = c(iv_true_functional, 1) 
-b1 = c(b1, TRUE)
-b2 = c(b2, TRUE)
-f1 = c(f1, TRUE)
-f2 = c(f2, TRUE) 
-f3 = c(f3, FALSE) 
-i1 = c(i1, TRUE) 
-i2 = c(i2, TRUE) 
-i3 = c(i3, FALSE) 
-i4 = c(i4, TRUE) 
-hypothesis = c(hypothesis, "A")
-beta = c(beta, 10)
-size_values = c(size_values, NA)
-power_values = c(power_values, power)
-
-
-# f1 and i3 are violated
-p_values_alternative_bdoor_correct_f1i3_violated <- foreach(i = 1:N, .combine = c) %dopar% {
-  
-  df <- dgp_backdoor_frontdoor_iv_bdoor_correct_f1i3_violated(n = n, beta = 10, beta_defier = 1)
-  data <- df$df
-  
-  # estimate using AIPW (backdoor IF)
-  backdoor <- estimate_backdooor(data)
-  backdoor.est <- backdoor$backdoor.est
-  backdoor.eif <- backdoor$backdoor.eif
-  
-  # estimate using APIPW (front door IF)
-  frontdoor <- estimate_frontdoor(data)
-  frontdoor.est <- frontdoor$frontdoor.est
-  frontdoor.eif <- frontdoor$frontdoor.eif
-  
-  # estimate using UIV (IV IF)
-  iv <- estimate_uiv(data)
-  iv.est <- iv$iv.est
-  iv.eif <- iv$iv.eif
-  
-  # Evidence factor
-  est <- c(backdoor.est, frontdoor.est, iv.est)
-  eif <- cbind(backdoor.eif, frontdoor.eif, iv.eif)
-  evidence_factor(est = est, eif = eif)
-  
-}
-
-typeII <- sum(p_values_alternative_bdoor_correct_f1i3_violated > 0.05)/length(p_values_alternative_bdoor_correct_f1i3_violated)
-power <- 1-typeII
-
-# [1] 1
-
-# write the result to the table
-backdoor_values = c(backdoor_values, TRUE)
-frontdoor_values = c(frontdoor_values, FALSE)
-iv_values = c(iv_values, FALSE) 
-backdoor_true_functional = c(backdoor_true_functional, 1)
-frontdoor_true_functional = c(frontdoor_true_functional, 1)
-iv_true_functional = c(iv_true_functional, 1) 
-b1 = c(b1, TRUE)
-b2 = c(b2, TRUE)
-f1 = c(f1, FALSE)
-f2 = c(f2, TRUE) 
-f3 = c(f3, TRUE) 
-i1 = c(i1, TRUE) 
-i2 = c(i2, TRUE) 
-i3 = c(i3, FALSE) 
 i4 = c(i4, TRUE) 
 hypothesis = c(hypothesis, "A")
 beta = c(beta, 10)
@@ -960,175 +835,7 @@ power_values = c(power_values, power)
 
 
 ### d) one of phi_k = 0, one of the model is correct 
-# d.1) backdoor and iv are correct, front door is wrong
-# (the identified frontdoor functional is zero)
-p_values_alternative_bdoor_iv_correct_f1_violated <- foreach(i = 1:N, .combine = c) %dopar% {
-  
-  df <- dgp_backdoor_frontdoor_iv_f1_violated(n = n, beta = 10)
-  data <- df$df
-  
-  # estimate using AIPW (backdoor IF)
-  backdoor <- estimate_backdooor(data)
-  backdoor.est <- backdoor$backdoor.est
-  backdoor.eif <- backdoor$backdoor.eif
-  
-  # estimate using APIPW (front door IF)
-  frontdoor <- estimate_frontdoor(data)
-  frontdoor.est <- frontdoor$frontdoor.est
-  frontdoor.eif <- frontdoor$frontdoor.eif
-  
-  # estimate using UIV (IV IF)
-  iv <- estimate_uiv(data)
-  iv.est <- iv$iv.est
-  iv.eif <- iv$iv.eif
-  
-  # Evidence factor
-  est <- c(backdoor.est, frontdoor.est, iv.est)
-  eif <- cbind(backdoor.eif, frontdoor.eif, iv.eif)
-  evidence_factor(est = est, eif = eif)
-  
-}
-
-typeII <- sum(p_values_alternative_bdoor_iv_correct_f1_violated > 0.05)/length(p_values_alternative_bdoor_iv_correct_f1_violated)
-power <- 1-typeII
-
-# [1] 0.302
-
-# write the result to the table
-backdoor_values = c(backdoor_values, TRUE)
-frontdoor_values = c(frontdoor_values, FALSE)
-iv_values = c(iv_values, TRUE) 
-backdoor_true_functional = c(backdoor_true_functional, 1)
-frontdoor_true_functional = c(frontdoor_true_functional, 0)
-iv_true_functional = c(iv_true_functional, 1) 
-b1 = c(b1, TRUE)
-b2 = c(b2, TRUE)
-f1 = c(f1, FALSE)
-f2 = c(f2, TRUE) 
-f3 = c(f3, TRUE) 
-i1 = c(i1, TRUE) 
-i2 = c(i2, TRUE) 
-i3 = c(i3, TRUE) 
-i4 = c(i4, TRUE) 
-hypothesis = c(hypothesis, "A")
-beta = c(beta, 10)
-size_values = c(size_values, NA)
-power_values = c(power_values, power)
-
-
-
-# d.2) backdoor and frontdoor are correct, iv is wrong
-# (the identified iv functional is zero)
-p_values_alternative_bdoor_fdoor_correct_i4_violated <- foreach(i = 1:N, .combine = c) %dopar% {
-  
-  df <- dgp_backdoor_frontdoor_iv_i4_violated(n = n, beta = 10)
-  data <- df$df
-  
-  # estimate using AIPW (backdoor IF)
-  backdoor <- estimate_backdooor(data)
-  backdoor.est <- backdoor$backdoor.est
-  backdoor.eif <- backdoor$backdoor.eif
-  
-  # estimate using APIPW (front door IF)
-  frontdoor <- estimate_frontdoor(data)
-  frontdoor.est <- frontdoor$frontdoor.est
-  frontdoor.eif <- frontdoor$frontdoor.eif
-  
-  # estimate using UIV (IV IF)
-  iv <- estimate_uiv(data)
-  iv.est <- iv$iv.est
-  iv.eif <- iv$iv.eif
-  
-  # Evidence factor
-  est <- c(backdoor.est, frontdoor.est, iv.est)
-  eif <- cbind(backdoor.eif, frontdoor.eif, iv.eif)
-  evidence_factor(est = est, eif = eif)
-  
-}
-
-typeII <- sum(p_values_alternative_bdoor_fdoor_correct_i4_violated > 0.05)/length(p_values_alternative_bdoor_fdoor_correct_i4_violated)
-power <- 1-typeII
-
-# [1] 0
-
-
-# write the result to the table
-backdoor_values = c(backdoor_values, TRUE)
-frontdoor_values = c(frontdoor_values, TRUE)
-iv_values = c(iv_values, FALSE) 
-backdoor_true_functional = c(backdoor_true_functional, 1)
-frontdoor_true_functional = c(frontdoor_true_functional, 1)
-iv_true_functional = c(iv_true_functional, 1) 
-b1 = c(b1, TRUE)
-b2 = c(b2, TRUE)
-f1 = c(f1, TRUE)
-f2 = c(f2, TRUE) 
-f3 = c(f3, TRUE) 
-i1 = c(i1, TRUE) 
-i2 = c(i2, TRUE) 
-i3 = c(i3, TRUE) 
-i4 = c(i4, FALSE) 
-hypothesis = c(hypothesis, "A")
-beta = c(beta, 10)
-size_values = c(size_values, NA)
-power_values = c(power_values, power)
-
-
-# d.3) iv is correct, backdoor and front door are wrong 
-# (the identified frontdoor functional is zero)
-p_values_alternative_iv_correct_b2f1f3_violated <- foreach(i = 1:N, .combine = c) %dopar% {
-  
-  df <- dgp_backdoor_frontdoor_iv_iv_correct_b2f1f3_violated(n = n, beta = 10)
-  data <- df$df
-  
-  # estimate using AIPW (backdoor IF)
-  backdoor <- estimate_backdooor(data)
-  backdoor.est <- backdoor$backdoor.est
-  backdoor.eif <- backdoor$backdoor.eif
-  
-  # estimate using APIPW (front door IF)
-  frontdoor <- estimate_frontdoor(data)
-  frontdoor.est <- frontdoor$frontdoor.est
-  frontdoor.eif <- frontdoor$frontdoor.eif
-  
-  # estimate using UIV (IV IF)
-  iv <- estimate_uiv(data)
-  iv.est <- iv$iv.est
-  iv.eif <- iv$iv.eif
-  
-  # Evidence factor
-  est <- c(backdoor.est, frontdoor.est, iv.est)
-  eif <- cbind(backdoor.eif, frontdoor.eif, iv.eif)
-  evidence_factor(est = est, eif = eif)
-  
-}
-
-typeII <- sum(p_values_alternative_iv_correct_b2f1f3_violated > 0.05)/length(p_values_alternative_iv_correct_b2f1f3_violated)
-power <- 1-typeII
-
-# [1] 0.502
-
-# write the result to the table
-backdoor_values = c(backdoor_values, FALSE)
-frontdoor_values = c(frontdoor_values, FALSE)
-iv_values = c(iv_values, TRUE) 
-backdoor_true_functional = c(backdoor_true_functional, 1)
-frontdoor_true_functional = c(frontdoor_true_functional, 0)
-iv_true_functional = c(iv_true_functional, 1) 
-b1 = c(b1, TRUE)
-b2 = c(b2, FALSE)
-f1 = c(f1, FALSE)
-f2 = c(f2, TRUE) 
-f3 = c(f3, FALSE) 
-i1 = c(i1, TRUE) 
-i2 = c(i2, TRUE) 
-i3 = c(i3, TRUE) 
-i4 = c(i4, TRUE) 
-hypothesis = c(hypothesis, "A")
-beta = c(beta, 10)
-size_values = c(size_values, NA)
-power_values = c(power_values, power)
-
+# iv is correct, backdoor and front door are wrong 
 # (the identified frontdoor functional is zero)
 p_values_alternative_iv_correct_b2f1f2_violated <- foreach(i = 1:N, .combine = c) %dopar% {
   
@@ -1178,6 +885,112 @@ f3 = c(f3, TRUE)
 i1 = c(i1, TRUE) 
 i2 = c(i2, TRUE) 
 i3 = c(i3, TRUE) 
+i4 = c(i4, TRUE) 
+hypothesis = c(hypothesis, "A")
+beta = c(beta, 10)
+size_values = c(size_values, NA)
+power_values = c(power_values, power)
+
+# f1 and i3 are violated (the identified frontdoor functional is zero)
+p_values_alternative_bdoor_correct_f1i3_violated <- foreach(i = 1:N, .combine = c) %dopar% {
+  
+  df <- dgp_backdoor_frontdoor_iv_bdoor_correct_f1i3_violated(n = n, beta = 10)
+  data <- df$df
+  
+  # estimate using AIPW (backdoor IF)
+  backdoor <- estimate_backdooor(data)
+  backdoor.est <- backdoor$backdoor.est
+  backdoor.eif <- backdoor$backdoor.eif
+  
+  # estimate using APIPW (front door IF)
+  frontdoor <- estimate_frontdoor(data)
+  frontdoor.est <- frontdoor$frontdoor.est
+  frontdoor.eif <- frontdoor$frontdoor.eif
+  
+  # estimate using UIV (IV IF)
+  iv <- estimate_uiv(data)
+  iv.est <- iv$iv.est
+  iv.eif <- iv$iv.eif
+  
+  # Evidence factor
+  est <- c(backdoor.est, frontdoor.est, iv.est)
+  eif <- cbind(backdoor.eif, frontdoor.eif, iv.eif)
+  evidence_factor(est = est, eif = eif)
+  
+}
+
+typeII <- sum(p_values_alternative_bdoor_correct_f1i3_violated > 0.05)/length(p_values_alternative_bdoor_correct_f1i3_violated)
+power <- 1-typeII
+
+
+# write the result to the table
+backdoor_values = c(backdoor_values, TRUE)
+frontdoor_values = c(frontdoor_values, FALSE)
+iv_values = c(iv_values, FALSE) 
+backdoor_true_functional = c(backdoor_true_functional, 1)
+frontdoor_true_functional = c(frontdoor_true_functional, 0)
+iv_true_functional = c(iv_true_functional, 1) 
+b1 = c(b1, TRUE)
+b2 = c(b2, TRUE)
+f1 = c(f1, FALSE)
+f2 = c(f2, TRUE) 
+f3 = c(f3, TRUE) 
+i1 = c(i1, TRUE) 
+i2 = c(i2, TRUE) 
+i3 = c(i3, FALSE) 
+i4 = c(i4, TRUE) 
+hypothesis = c(hypothesis, "A")
+beta = c(beta, 10)
+size_values = c(size_values, NA)
+power_values = c(power_values, power)
+
+# backdoor is correct, front door and iv are wrong
+# f3 and i3 are violated
+p_values_alternative_bdoor_correct_f3i3_violated <- foreach(i = 1:N, .combine = c) %dopar% {
+  
+  df <- dgp_backdoor_frontdoor_iv_bdoor_correct_f3i3_violated(n = n, beta = 10)
+  data <- df$df
+  
+  # estimate using AIPW (backdoor IF)
+  backdoor <- estimate_backdooor(data)
+  backdoor.est <- backdoor$backdoor.est
+  backdoor.eif <- backdoor$backdoor.eif
+  
+  # estimate using APIPW (front door IF)
+  frontdoor <- estimate_frontdoor(data)
+  frontdoor.est <- frontdoor$frontdoor.est
+  frontdoor.eif <- frontdoor$frontdoor.eif
+  
+  # estimate using UIV (IV IF)
+  iv <- estimate_uiv(data)
+  iv.est <- iv$iv.est
+  iv.eif <- iv$iv.eif
+  
+  # Evidence factor
+  est <- c(backdoor.est, frontdoor.est, iv.est)
+  eif <- cbind(backdoor.eif, frontdoor.eif, iv.eif)
+  evidence_factor(est = est, eif = eif)
+  
+}
+
+typeII <- sum(p_values_alternative_bdoor_correct_f3i3_violated > 0.05)/length(p_values_alternative_bdoor_correct_f3i3_violated)
+power <- 1-typeII
+
+# write the result to the table
+backdoor_values = c(backdoor_values, TRUE)
+frontdoor_values = c(frontdoor_values, FALSE)
+iv_values = c(iv_values, FALSE) 
+backdoor_true_functional = c(backdoor_true_functional, 1)
+frontdoor_true_functional = c(frontdoor_true_functional, 1)
+iv_true_functional = c(iv_true_functional, 0) 
+b1 = c(b1, TRUE)
+b2 = c(b2, TRUE)
+f1 = c(f1, TRUE)
+f2 = c(f2, TRUE) 
+f3 = c(f3, FALSE) 
+i1 = c(i1, TRUE) 
+i2 = c(i2, TRUE) 
+i3 = c(i3, FALSE) 
 i4 = c(i4, TRUE) 
 hypothesis = c(hypothesis, "A")
 beta = c(beta, 10)

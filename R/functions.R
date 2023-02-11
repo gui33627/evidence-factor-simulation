@@ -29,13 +29,13 @@ estimate_frontdoor <- function(data){
 # estimate using unconditional IV (IV IF)
 estimate_uiv <- function(data){
   
-  z.model <- gam(Z ~ 1, family = 'binomial', data = data)
-  za.model <- gam(A ~ Z, family = 'binomial', data = data)
-  zy.model <- gam(Y ~ Z, family = 'gaussian', data = data)
+  # za.model <- gam(A ~ Z, family = 'binomial', data = data)
+  # zy.model <- gam(Y ~ Z, family = 'gaussian', data = data)
+  # iv.eif <- uiv(za.model, zy.model, data)
   
-  uiv <- uiv(z.model, za.model, zy.model, data)
-  iv.est <- uiv$est
-  iv.eif <- uiv$eif
+  iv.eif <- uiv(data)
+  iv.est <- mean(iv.eif)
+  iv.eif <- iv.eif - iv.est
   
   return(list(iv.est = iv.est, iv.eif = iv.eif))
 }

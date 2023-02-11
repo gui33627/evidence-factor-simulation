@@ -223,54 +223,6 @@ size_values = c(size_values, size)
 power_values = c(power_values, NA)
 
 
-# i4 is violated 
-# no association between Z and A, and no direct effect from Z to Y, 
-# *so the identified iv functional is zero*
-p_values_null_fdoor_correct_i4_violated <- foreach(i = 1:N, .combine = c) %dopar% {
-  
-  df <- dgp_frontdoor_iv_fdoor_correct_i4_violated(n = n, beta = 0)
-  data <- df$df
-  
-  # estimate using APIPW (front door IF)
-  frontdoor <- estimate_frontdoor(data)
-  frontdoor.est <- frontdoor$frontdoor.est
-  frontdoor.eif <- frontdoor$frontdoor.eif
-  
-  # estimate using UIV (IV IF)
-  iv <- estimate_uiv(data)
-  iv.est <- iv$iv.est
-  iv.eif <- iv$iv.eif
-  
-  # Evidence factor
-  est <- c(frontdoor.est, iv.est)
-  eif <- cbind(frontdoor.eif, iv.eif)
-  evidence_factor(est = est, eif = eif)
-  
-}
-
-typeI <- sum(p_values_null_fdoor_correct_i4_violated <= 0.05)/length(p_values_null_fdoor_correct_i4_violated)
-power <- typeI
-size <- power
-
-# [1] 0
-
-frontdoor_values = c(frontdoor_values, TRUE)
-iv_values = c(iv_values, FALSE) 
-frontdoor_true_functional = c(frontdoor_true_functional, 0)
-iv_true_functional = c(iv_true_functional, 0) 
-f1 = c(f1, TRUE)
-f2 = c(f2, TRUE) 
-f3 = c(f3, TRUE) 
-i1 = c(i1, TRUE) 
-i2 = c(i2, TRUE) 
-i3 = c(i3, TRUE) 
-i4 = c(i4, FALSE) 
-hypothesis = c(hypothesis, "N")
-beta = c(beta, 0)
-size_values = c(size_values, size)
-power_values = c(power_values, NA)
-
-
 ### c) iv is true, front-door is not 
 # f1 is violated, *the identified front-door functional is zero*
 p_values_null_iv_correct_f1_violated <- foreach(i = 1:N, .combine = c) %dopar% {
@@ -549,49 +501,5 @@ beta = c(beta, 10)
 size_values = c(size_values, NA)
 power_values = c(power_values, power)
 
-
-# c.2) front door correct, iv is wrong
-p_values_alternative_fdoor_correct_i4_violated <- foreach(i = 1:N, .combine = c) %dopar% {
-  
-  df <- dgp_frontdoor_iv_fdoor_correct_i4_violated(n = n, beta = 10)
-  data <- df$df
-  
-  # estimate using APIPW (front door IF)
-  frontdoor <- estimate_frontdoor(data)
-  frontdoor.est <- frontdoor$frontdoor.est
-  frontdoor.eif <- frontdoor$frontdoor.eif
-  
-  # estimate using UIV (IV IF)
-  iv <- estimate_uiv(data)
-  iv.est <- iv$iv.est
-  iv.eif <- iv$iv.eif
-  
-  # Evidence factor
-  est <- c(frontdoor.est, iv.est)
-  eif <- cbind(frontdoor.eif, iv.eif)
-  evidence_factor(est = est, eif = eif)
-  
-}
-
-typeII <- sum(p_values_alternative_fdoor_correct_i4_violated > 0.05)/length(p_values_alternative_fdoor_correct_i4_violated)
-power <- 1-typeII
-
-# [1] 0
-
-frontdoor_values = c(frontdoor_values, TRUE)
-iv_values = c(iv_values, FALSE) 
-frontdoor_true_functional = c(frontdoor_true_functional, 1)
-iv_true_functional = c(iv_true_functional, 0) 
-f1 = c(f1, TRUE)
-f2 = c(f2, TRUE) 
-f3 = c(f3, TRUE) 
-i1 = c(i1, TRUE) 
-i2 = c(i2, TRUE) 
-i3 = c(i3, TRUE) 
-i4 = c(i4, FALSE) 
-hypothesis = c(hypothesis, "A")
-beta = c(beta, 10)
-size_values = c(size_values, NA)
-power_values = c(power_values, power)
 
 

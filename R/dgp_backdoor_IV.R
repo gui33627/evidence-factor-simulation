@@ -36,10 +36,9 @@ dgp_backdoor_iv_both_correct <- function(n, beta = 4) {
   
   # Outcome (not a function directly of Z, Z only affects the outcome through the treatment, (I2) satisfied)
   # potential outcomes of Y
-  muY1.AUCZ <- beta*A1 + U - 2* sqrt(abs(C[,1])) + sin(C[,4])
-  muY0.AUCZ <- beta*A0 + U - 2* sqrt(abs(C[,1])) + sin(C[,4])
-  Y1 <- rnorm(n, mean = muY1.AUCZ)
-  Y0 <- rnorm(n, mean = muY0.AUCZ)
+  error <- rnorm(n, mean = 0)
+  Y1 <- beta*A1 + 2*U + 2* sqrt(abs(C[,1])) + sin(C[,4]) + error
+  Y0 <- beta*A0 + 2*U + 2* sqrt(abs(C[,1])) + sin(C[,4]) + error
   Y <- ifelse(Z == 1, Y1, Y0) 
   
   PO.diff.CACE <- Y1[idx_complier] - Y0[idx_complier]
@@ -93,12 +92,11 @@ dgp_backdoor_iv_bdoor_correct_i3_violated <- function(n, beta = 10, beta_defier 
   
   # Outcome (not a function directly of Z, (I2) satisfied)
   # Potential outcomes of Y
-  muY1.AUCZ <- beta*A1 + U + sqrt(abs(C[,1])) + sin(C[,4])
-  muY0.AUCZ <- beta*A0 + U + sqrt(abs(C[,1])) + sin(C[,4])
-  muY1.AUCZ[idx_defier] <- beta_defier*A1[idx_defier] + 2*U[idx_defier] + 3*sqrt(abs(C[,1][idx_defier])) + sin(C[,4][idx_defier])
-  muY0.AUCZ[idx_defier] <- beta_defier*A0[idx_defier] + 2*U[idx_defier] + 3*sqrt(abs(C[,1][idx_defier])) + sin(C[,4][idx_defier])
-  Y1 <- rnorm(n, mean = muY1.AUCZ)
-  Y0 <- rnorm(n, mean = muY0.AUCZ)
+  error <- rnorm(n, mean = 0)
+  Y1 <- beta*A1 + 2*U + 2*sqrt(abs(C[,1])) + sin(C[,4]) + error
+  Y0 <- beta*A0 + 2*U + 2*sqrt(abs(C[,1])) + sin(C[,4]) + error
+  Y1[idx_defier] <- beta*A1[idx_defier] + 2*U[idx_defier] + 2*sqrt(abs(C[,1][idx_defier])) + sin(C[,4][idx_defier]) + error[idx_defier]
+  Y0[idx_defier] <- beta*A0[idx_defier] + 2*U[idx_defier] + 2*sqrt(abs(C[,1][idx_defier])) + sin(C[,4][idx_defier]) + error[idx_defier]
   Y <- ifelse(Z == 1, Y1, Y0)
   
   PO.diff.CACE <- Y1[idx_complier] - Y0[idx_complier]
@@ -106,49 +104,6 @@ dgp_backdoor_iv_bdoor_correct_i3_violated <- function(n, beta = 10, beta_defier 
   return(list(df = data.frame(Y, Z, A, C), idx_complier = idx_complier, CACE =  mean(PO.diff.CACE)))
 }
 
-
-
-dgp_backdoor_iv_bdoor_correct_i4_violated <- function(n, beta = 4) {
-  
-  # Unmeasured confounder
-  U <- matrix(runif(n, min=-2,max=2))
-  
-  # Measured confounders (not a descendant of A, (B2) satisfied)
-  C <- data.frame(matrix(runif(n * 4, min=-2,max=2), ncol=4))
-  
-  # Instrumental variable (randomized, (I1) satisfied)
-  Z <- rbinom(n = n, size = 1, prob = 0.5)
-  
-  # Treatment (a function of C, not of U, (B1) satisfied)
-  pA.UC <- expit(C[,1] + expit(C[,2]) + sin(C[,3]))
-  A1 <- rbinom(n, size = 1, prob = pA.UC)
-  A0 <- rbinom(n, size = 1, prob = 1-pA.UC)
-  
-  # no defier, convert to compliers ((I3) satisfied)
-  A1[which(A1 == 0 & A0 == 1)] <- 1
-  A0[which(A1 == 0 & A0 == 1)] <- 0
-  
-  idx_complier <- which(A1 == 1 & A0 == 0)
-  idx_never <- which(A1 == 0 & A0 == 0)
-  idx_always <- which(A1 == 1 & A0 == 1)
-  # A is randomized, no connection with Z ((I4) violated)
-  A <- A1
-  
-  # Outcome (not a function directly of Z, (I2) satisfied)
-  muY.AUCZ <- beta*A + U - 2* sqrt(abs(C[,1])) + sin(C[,4])
-  Y <- rnorm(n, mean = muY.AUCZ) 
-  
-  # also create a column for finding true causal effect
-  # Potential outcomes of Y
-  muY1.AUCZ <- beta*1 + U - 2* sqrt(abs(C[,1])) + sin(C[,4])
-  muY0.AUCZ <- beta*0 + U - 2* sqrt(abs(C[,1])) + sin(C[,4])
-  Y1 <- rnorm(n, mean = muY1.AUCZ)
-  Y0 <- rnorm(n, mean = muY0.AUCZ)
-  
-  PO.diff.CACE <- Y1[idx_complier] - Y0[idx_complier]
-  
-  return(list(df = data.frame(Y, Z, A, C), idx_complier = idx_complier, CACE =  mean(PO.diff.CACE)))
-}
 
 
 # 3. IV assumptions satisfied, but backdoor criterion violated
@@ -184,10 +139,9 @@ dgp_backdoor_iv_iv_correct_b1_violated <- function(n, beta = 4) {
   
   # Outcome (not a function directly of Z, Z only affects the outcome through the treatment, (I2) satisfied)
   # potential outcomes of Y
-  muY1.AUCZ <- beta*A1 + U + 2* sqrt(abs(C[,1])) + sin(C[,4])
-  muY0.AUCZ <- beta*A0 + U + 2* sqrt(abs(C[,1])) + sin(C[,4])
-  Y1 <- rnorm(n, mean = muY1.AUCZ)
-  Y0 <- rnorm(n, mean = muY0.AUCZ)
+  error <- rnorm(n, mean = 0)
+  Y1 <- beta*A1 + 2*U + 2* sqrt(abs(C[,1])) + sin(C[,4]) + error
+  Y0 <- beta*A0 + 2*U + 2* sqrt(abs(C[,1])) + sin(C[,4]) + error
   Y <- ifelse(Z == 1, Y1, Y0) 
   
   PO.diff.CACE <- Y1[idx_complier] - Y0[idx_complier]
@@ -224,10 +178,9 @@ dgp_backdoor_iv_iv_correct_b2_violated <- function(n, beta = 4) {
   
   # Outcome (not a function directly of Z, Z only affects the outcome through the treatment, (I2) satisfied)
   # potential outcomes of Y
-  muY1.AUCZ <- beta*A1 + U + sin(C[,4])
-  muY0.AUCZ <- beta*A0 + U + sin(C[,4])
-  Y1 <- rnorm(n, mean = muY1.AUCZ)
-  Y0 <- rnorm(n, mean = muY0.AUCZ)
+  error <- rnorm(n, mean = 0)
+  Y1 <- beta*A1 + 2*U + sin(C[,4]) + error
+  Y0 <- beta*A0 + 2*U + sin(C[,4]) + error
   Y <- ifelse(Z == 1, Y1, Y0) 
   
   # Measured confounders (a node in C is a collider, (B2) violated)
