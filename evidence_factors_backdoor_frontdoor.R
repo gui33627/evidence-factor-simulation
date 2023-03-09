@@ -215,6 +215,51 @@ size_values = c(size_values, size)
 power_values = c(power_values, NA)
 
 
+# backdoor is wrong, but the identified backdoor functional is 0 
+p_values_null_fdoor_correct_b1_violated_null_zero <- foreach(i = 1:N, .combine = c) %dopar% {
+  
+  data <- dgp_backdoor_frontdoor_fdoor_correct_b1_violated_null(n = n, beta = 0)
+  
+  # estimate using AIPW (backdoor IF)
+  backdoor <- estimate_backdooor(data)
+  backdoor.est <- backdoor$backdoor.est
+  backdoor.eif <- backdoor$backdoor.eif
+  
+  # estimate using APIPW (front door IF)
+  frontdoor <- estimate_frontdoor(data)
+  frontdoor.est <- frontdoor$frontdoor.est
+  frontdoor.eif <- frontdoor$frontdoor.eif
+  
+  # Evidence factor
+  est <- c(backdoor.est, frontdoor.est)
+  eif <- cbind(backdoor.eif, frontdoor.eif)
+  evidence_factor(est = est, eif = eif)
+  
+}
+
+typeI <- sum(p_values_null_fdoor_correct_b1_violated_null_zero <= 0.05)/length(p_values_null_fdoor_correct_b1_violated_null_zero)
+power <- typeI
+size <- power
+
+
+# write the result to the table
+backdoor_values = c(backdoor_values, FALSE)
+frontdoor_values = c(frontdoor_values, TRUE)
+backdoor_true_functional = c(backdoor_true_functional, 0)
+frontdoor_true_functional = c(frontdoor_true_functional, 0)
+b1 = c(b1, FALSE)
+b2 = c(b2, TRUE)
+f1 = c(f1, TRUE)
+f2 = c(f2, TRUE) 
+f3 = c(f3, TRUE) 
+hypothesis = c(hypothesis, "N")
+beta = c(beta, 0)
+size_values = c(size_values, size)
+power_values = c(power_values, NA)
+
+
+
+
 ####################### 2. Under Alternative Hypothesis ########################
 ### a) all phi_k != 0, one of the model is correct
 # a.1) front door is correct, backdoor is wrong
@@ -393,4 +438,42 @@ size_values = c(size_values, NA)
 power_values = c(power_values, power)
 
 
+# front-door is correct, backdoor is wrong
+p_values_alternative_fdoor_correct_b1_violated_alt_zero <- foreach(i = 1:N, .combine = c) %dopar% {
+  
+  data <- dgp_backdoor_frontdoor_fdoor_correct_b1_violated_alt(n = n, beta = 3)
+  
+  # estimate using AIPW (backdoor IF)
+  backdoor <- estimate_backdooor(data)
+  backdoor.est <- backdoor$backdoor.est
+  backdoor.eif <- backdoor$backdoor.eif
+  
+  # estimate using APIPW (front door IF)
+  frontdoor <- estimate_frontdoor(data)
+  frontdoor.est <- frontdoor$frontdoor.est
+  frontdoor.eif <- frontdoor$frontdoor.eif
+  
+  # Evidence factor
+  est <- c(backdoor.est, frontdoor.est)
+  eif <- cbind(backdoor.eif, frontdoor.eif)
+  evidence_factor(est = est, eif = eif)
+  
+}
 
+typeII <- sum(p_values_alternative_fdoor_correct_b1_violated_alt_zero > 0.05)/length(p_values_alternative_fdoor_correct_b1_violated_alt_zero)
+power <- 1-typeII
+
+# write the result to the table
+backdoor_values = c(backdoor_values, FALSE)
+frontdoor_values = c(frontdoor_values, TRUE)
+backdoor_true_functional = c(backdoor_true_functional, 0)
+frontdoor_true_functional = c(frontdoor_true_functional, 1)
+b1 = c(b1, FALSE)
+b2 = c(b2, TRUE)
+f1 = c(f1, TRUE)
+f2 = c(f2, TRUE) 
+f3 = c(f3, TRUE) 
+hypothesis = c(hypothesis, "A")
+beta = c(beta, 3)
+size_values = c(size_values, NA)
+power_values = c(power_values, power)
