@@ -4,9 +4,17 @@ expit <- function(x) 1 / (1 + exp(-x))
 
 
 # estimate using AIPW (backdoor IF)
-estimate_backdooor <- function(data) {
-  pi.model <- gam(A ~ s(X1) + s(X2) + s(X3) + s(X4), family = 'binomial', data = data)
-  mu.model <- gam(Y ~ A + s(X1) + s(X2) + s(X3) + s(X4), family = 'gaussian', data = data)
+estimate_backdooor <- function(data, confounderZ = FALSE) {
+  # confounderZ: whether Z is a confounder to be controlled in the estimation
+  
+  if(confounderZ ==TRUE){
+    pi.model <- gam(A ~ s(X1) + s(X2) + s(X3) + s(X4) + Z, family = 'binomial', data = data)
+    mu.model <- gam(Y ~ A + s(X1) + s(X2) + s(X3) + s(X4) + Z, family = 'gaussian', data = data)
+  }else{
+    pi.model <- gam(A ~ s(X1) + s(X2) + s(X3) + s(X4), family = 'binomial', data = data)
+    mu.model <- gam(Y ~ A + s(X1) + s(X2) + s(X3) + s(X4), family = 'gaussian', data = data)
+  }
+ 
   backdoor.eif <- aipw(pi.model, mu.model, data)
   backdoor.est <- mean(backdoor.eif)
   backdoor.eif <- backdoor.eif - backdoor.est
@@ -15,10 +23,18 @@ estimate_backdooor <- function(data) {
 }
 
 # estimate using APIPW (front door IF)
-estimate_frontdoor <- function(data){
-  A.model <- gam(A ~ s(X1) + s(X2) + s(X3) + s(X4), family = 'binomial', data = data)
-  M.model <- gam(M ~ A + s(X1) + s(X2) + s(X3) + s(X4), family = 'binomial', data = data)
-  Y.model <- gam(Y ~ A + M + s(X1) + s(X2) + s(X3) + s(X4), family = 'gaussian', data = data)
+estimate_frontdoor <- function(data, confounderZ = FALSE){
+  
+  if(confounderZ ==TRUE){
+    A.model <- gam(A ~ s(X1) + s(X2) + s(X3) + s(X4) + Z, family = 'binomial', data = data)
+    M.model <- gam(M ~ A + s(X1) + s(X2) + s(X3) + s(X4) + Z, family = 'binomial', data = data)
+    Y.model <- gam(Y ~ A + M + s(X1) + s(X2) + s(X3) + s(X4) + Z, family = 'gaussian', data = data)
+  }else{
+    A.model <- gam(A ~ s(X1) + s(X2) + s(X3) + s(X4), family = 'binomial', data = data)
+    M.model <- gam(M ~ A + s(X1) + s(X2) + s(X3) + s(X4), family = 'binomial', data = data)
+    Y.model <- gam(Y ~ A + M + s(X1) + s(X2) + s(X3) + s(X4), family = 'gaussian', data = data)
+  }
+  
   frontdoor.eif <- apipw(A.model, M.model, Y.model, data)
   frontdoor.est <- mean(frontdoor.eif)
   frontdoor.eif <- frontdoor.eif - frontdoor.est

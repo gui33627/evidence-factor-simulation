@@ -126,6 +126,50 @@ size_values = c(size_values, size)
 power_values = c(power_values, NA)
 
 
+p_values_null_bdoor_correct_i2_violated <- foreach(i = 1:N, .combine = c) %dopar% {
+  
+  df <- dgp_backdoor_iv_bdoor_correct_i2_violated(n = n, beta = 0)
+  data <- df$df
+  
+  # estimate using AIPW (backdoor IF)
+  backdoor <- estimate_backdooor(data, confounderZ = TRUE)
+  backdoor.est <- backdoor$backdoor.est
+  backdoor.eif <- backdoor$backdoor.eif
+  
+  # estimate using UIV (IV IF)
+  iv <- estimate_uiv(data)
+  iv.est <- iv$iv.est
+  iv.eif <- iv$iv.eif
+  
+  # Evidence factor
+  est <- c(backdoor.est, iv.est)
+  eif <- cbind(backdoor.eif, iv.eif)
+  evidence_factor(est = est, eif = eif)
+  
+}
+
+typeI <- sum(p_values_null_bdoor_correct_i2_violated <= 0.05)/length(p_values_null_bdoor_correct_i2_violated)
+power <- typeI
+size <- power
+
+# [1] 0
+
+backdoor_values = c(backdoor_values, TRUE)
+iv_values = c(iv_values, FALSE) 
+backdoor_true_functional = c(backdoor_true_functional, 0)
+iv_true_functional = c(iv_true_functional, 1) 
+b1 = c(b1, TRUE)
+b2 = c(b2, TRUE)
+i1 = c(i1, TRUE) 
+i2 = c(i2, FALSE) 
+i3 = c(i3, TRUE) 
+i4 = c(i4, TRUE) 
+hypothesis = c(hypothesis, "N")
+beta = c(beta, 0)
+size_values = c(size_values, size)
+power_values = c(power_values, NA)
+
+
 ### c) iv is correct, backdoor is not 
 # b2 is violated, conditioning on C opens a path from A to Y,
 # so when beta = 0, *the identified backdoor functional is not zero*
