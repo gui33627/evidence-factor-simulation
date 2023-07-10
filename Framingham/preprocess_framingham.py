@@ -24,7 +24,7 @@ def process_data():
     ids = {i: 0 for i in counts.index if counts[i] > 1}
 
     # info collected on each individual
-    variables = ["age_cont_1", "smoke_bin_1", "smoke_cont_1",  "sex_bin_1", "bmi_cont_1", "prevchd_bin_1", "prevhyp_bin_1", "hyperten_bin_2", "diabetes_bin_2", "diabetes_cont_2", "bp_cont_2"]
+    variables = ["age_cont_1", "smoke_bin_1", "smoke_cont_1",  "sex_bin_1", "bmi_cont_1", "prevchd_bin_1", "prevhyp_bin_1", "prediabetes_cont_1", "hyperten_bin_2", "diabetes_bin_2", "diabetes_cont_2", "bp_cont_2"]
     data = {v: [] for v in variables}
 
 
@@ -44,6 +44,7 @@ def process_data():
             data["bmi_cont_1"].append(row["BMI"]) # bmi
             data["prevchd_bin_1"].append(row["PREVCHD"]) # prevalent coronary heart disease
             data["prevhyp_bin_1"].append(row["PREVHYP"]) # prevalent hypertensive
+            data["prediabetes_cont_1"].append(row["GLUCOSE"])
             
 
 
