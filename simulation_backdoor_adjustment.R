@@ -135,7 +135,7 @@ df_backdoor_adjustment_null_plot <- df_backdoor_adjustment_null %>%
   geom_hline(aes(yintercept=0.05), linetype="dashed", color = "black") +
   labs(x = "Sample Size",
        y = "Type I Error Rate",
-       title= "Under Null (\u03b1 = 0.05)") +
+       title= "Under the Null (\u03b1 = 0.05)") +
   scale_x_continuous(breaks=c(250, 500, 750, 1000)) + 
   theme(legend.position="bottom",
         plot.title = element_text(hjust = 0.5)) 
@@ -150,11 +150,11 @@ df_backdoor_adjustment_alt <- results %>% filter(hypothesis == "A") %>%
 df_backdoor_adjustment_alt_plot <- df_backdoor_adjustment_alt %>% 
   ggplot(., aes(x = sample_size, y = power_values)) + 
   geom_line() +
-  geom_ribbon(aes(ymin = power_values - qnorm(.975)*se, ymax = power_values + qnorm(.975)*se), 
+  geom_ribbon(aes(ymin = power_values - qnorm(.975)*se, ymax = pmin(power_values + qnorm(.975)*se, 1)), 
               alpha=0.2, linetype = "dashed", show.legend = FALSE) +
   labs(x = "Sample Size", y = "Power",
-       title= "Under Alternative (\u03b1 = 0.05)") +
-  scale_x_continuous(breaks=c(250, 500, 750, 1000)) + ylim(0.95, 1.01) +
+       title= "Under the Alternative (\u03b1 = 0.05)") +
+  scale_x_continuous(breaks=c(250, 500, 750, 1000)) + ylim(0.97, 1.0) +
   theme(legend.position="bottom",
         plot.title = element_text(hjust = 0.5))
 
