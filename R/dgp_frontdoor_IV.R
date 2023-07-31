@@ -187,7 +187,7 @@ dgp_frontdoor_iv_fdoor_correct_i3_violated <- function(n, beta = 3) {
   # potential outcomes of mediator (not a function of U, so there is no unblocked backdoor path from A to M given C, (F2) satisfied; no unblocked backdoor path from M to Y given C, (F3) satisfied)
   pM1.AUC <- expit(5 * 1 - 1 + C[,2]) # pM1.AUC and pM0.AUC are the same for never takers and always takers, exclusion restriction satisfied
   pM0.AUC <- expit(5 * 0 - 1 + C[,2])
-  pM1.AUC[idx_complier] <- expit(2 * 1 - 1 + C[,2][idx_complier]) # the effects of A for defiers and others are different
+  pM1.AUC[idx_complier] <- expit(2 * 1 - 1 + C[,2][idx_complier]) # the effects of A for defiers and compliers are different
   pM0.AUC[idx_complier] <- expit(2 * 0 - 1 + C[,2][idx_complier])
   M1 <- rbinom(n, size = 1, prob = pM1.AUC) 
   M0 <- rbinom(n, size = 1, prob = pM0.AUC)
