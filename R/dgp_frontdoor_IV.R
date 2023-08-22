@@ -64,55 +64,6 @@ dgp_frontdoor_iv_both_correct <- function(n, beta = 3) {
 # Violate the assumption (I3): defiers exist
 # Violate the assumption (I4): zero correlation between instrument and treatment
 
-dgp_frontdoor_iv_fdoor_correct_i1_violated <- function(n, beta = 3) {
-  
-  # Unmeasured confounder
-  U <- matrix(runif(n, min=-2,max=2))
-  U1 <- matrix(rnorm(n, mean = 2, sd = 1))
-  
-  # Measured confounders 
-  C <- data.frame(matrix(runif(n * 4, min=-2,max=2), ncol=4))
-  
-  # Instrumental variable (a function of U, (I1) violated)
-  pZ.C <- expit(2 + 2*U)
-  Z <- rbinom(n = n, size = 1, prob = pZ.C)
-  
-  # Treatment (a function of U1, so backdoor cannot be used)
-  pA.UC <- expit(C[,1] + expit(C[,2]) + sin(C[,3]) + U1)
-  A1 <- rbinom(n, size = 1, prob = pA.UC)
-  A0 <- rbinom(n, size = 1, prob = 1-pA.UC)
-  
-  # no defier, convert to compliers ((I3) satisfied)
-  idx_defier <- which(A1 == 0 & A0 == 1)
-  A1[idx_defier] <- 1
-  A0[idx_defier] <- 0
-  
-  idx_complier <- which(A1 == 1 & A0 == 0)
-  idx_never <- which(A1 == 0 & A0 == 0)
-  idx_always <- which(A1 == 1 & A0 == 1)
-  #  A is determined by Z based on the four types of people, (I4) satisfied
-  A <- ifelse(Z == 1, A1, A0)
-  
-  # potential outcomes of mediator (not a function of U, so there is no unblocked backdoor path from A to M given C, (F2) satisfied; no unblocked backdoor path from M to Y given C, (F3) satisfied)
-  pM1.AUC <- expit(5 * 1 - 1 + C[,2]) # pM1.AUC and pM0.AUC are the same for never takers and always takers, exclusion restriction satisfied
-  pM0.AUC <- expit(5 * 0 - 1 + C[,2])
-  M1 <- rbinom(n, size = 1, prob = pM1.AUC) 
-  M0 <- rbinom(n, size = 1, prob = pM0.AUC)
-  M <- ifelse(A == 1, M1, M0) # Z affects M only through A
-  
-  # potential outcomes of Y (not a function of A, (F1) satisfied; not a function directly of Z, (I2) satisfied)
-  error <- rnorm(n, mean = 0)
-  Y1 <- beta*M1 + 2*U + U1 + 2* sqrt(abs(C[,1])) + sin(C[,4]) + error
-  Y0 <- beta*M0 + 2*U + U1 + 2* sqrt(abs(C[,1])) + sin(C[,4]) + error
-  Y <- ifelse(A == 1, Y1, Y0) # Z affects Y only through A via M
-  
-  PO.diff.CACE <- Y1[idx_complier] - Y0[idx_complier]
-  
-  return(list(df = data.frame(Y, Z, M, A, C), idx_complier = idx_complier, CACE =  mean(PO.diff.CACE)))
-}
-
-
-
 dgp_frontdoor_iv_fdoor_correct_i2_violated <- function(n, beta = 3) {
   
   # Unmeasured confounder
@@ -204,6 +155,56 @@ dgp_frontdoor_iv_fdoor_correct_i3_violated <- function(n, beta = 3) {
   return(list(df = data.frame(Y, Z, M, A, C), idx_complier = idx_complier, CACE =  mean(PO.diff.CACE)))
 }
 
+# under the null
+# n = 10^6, IV CI: [1] -0.03650516  0.10040055
+
+dgp_frontdoor_iv_fdoor_correct_i3_violated_alt_zero <- function(n, beta = 3, coef_test = 2.38) {
+  
+  # Unmeasured confounder
+  U <- matrix(runif(n, min=-2,max=2))
+  
+  # Measured confounders 
+  C <- data.frame(matrix(runif(n * 4, min=-2,max=2), ncol=4))
+  
+  # Instrumental variable (randomized, (I1) satisfied)
+  Z <- rbinom(n = n, size = 1, prob = 0.5)
+  
+  # Treatment (a function of U, so backdoor cannot be used) 
+  pA.UC <- expit(C[,1] + expit(C[,2]) + sin(C[,3]) + U)
+  A1 <- rbinom(n, size = 1, prob = pA.UC)
+  A0 <- rbinom(n, size = 1, prob = 1-pA.UC)
+  
+  # (defiers exist, (I3) violated)
+  idx_complier <- which(A1 == 1 & A0 == 0)
+  idx_never <- which(A1 == 0 & A0 == 0)
+  idx_always <- which(A1 == 1 & A0 == 1)
+  idx_defier <- which(A1 == 0 & A0 == 1)
+  
+  #  A is determined by Z based on the four types of people, (I4) satisfied
+  A <- ifelse(Z == 1, A1, A0)
+  
+  # potential outcomes of mediator (not a function of U, so there is no unblocked backdoor path from A to M given C, (F2) satisfied; no unblocked backdoor path from M to Y given C, (F3) satisfied)
+  pM1.AUC <- expit(5 * 1 - 1 + C[,2]) # pM1.AUC and pM0.AUC are the same for never takers and always takers, exclusion restriction satisfied
+  pM0.AUC <- expit(5 * 0 - 1 + C[,2])
+  pM1.AUC[idx_complier] <- expit(coef_test * 1 - 1 + C[,2][idx_complier]) # the effects of A for defiers and compliers are different
+  pM0.AUC[idx_complier] <- expit(coef_test * 0 - 1 + C[,2][idx_complier])
+  M1 <- rbinom(n, size = 1, prob = pM1.AUC) 
+  M0 <- rbinom(n, size = 1, prob = pM0.AUC)
+  M <- ifelse(A == 1, M1, M0) # Z affects M only through A
+  
+  # potential outcomes of Y (not a function of A, (F1) satisfied; not a function directly of Z, (I2) satisfied)
+  error <- rnorm(n, mean = 0)
+  Y1 <- beta*M1 + U + 2* sqrt(abs(C[,1])) + sin(C[,4]) + error
+  Y0 <- beta*M0 + U + 2* sqrt(abs(C[,1])) + sin(C[,4]) + error
+  Y <- ifelse(A == 1, Y1, Y0) # Z affects Y only through A via M
+  
+  PO.diff.CACE <- Y1[idx_complier] - Y0[idx_complier]
+  
+  return(list(df = data.frame(Y, Z, M, A, C), idx_complier = idx_complier, CACE =  mean(PO.diff.CACE)))
+}
+
+# under the alternative
+#! n = 2000000, 2.38: IV CI: [1] -0.09589117  0.08792879
 
 # 3. IV assumptions satisfied, but front-door criterion violated
 # Violate the assumption (F1): there is a direct effect of A on Y
@@ -256,6 +257,10 @@ dgp_frontdoor_iv_iv_correct_f1_violated <- function(n, beta = 1.5) {
   return(list(df = data.frame(Y, Z, M, A, C), idx_complier = idx_complier, CACE =  mean(PO.diff.CACE)))
 }
 
+# Under the alternative
+# n = 10^6, front-door CI: [1] -0.03292823  0.02081113
+# Under the null
+# n = 10^6, front-door CI: [1] -0.04193629  0.01204803
 
 dgp_frontdoor_iv_iv_correct_f3_violated <- function(n, beta = 3) {
   

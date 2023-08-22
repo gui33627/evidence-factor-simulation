@@ -1,7 +1,7 @@
 # summary table of the test/power as a function of sample size
 
 library(mgcv)
-prefix <- "/home/junhuiyang/Documents/simulations.v7.hpc/"
+prefix <- "/home/junhuiyang/Documents/simulations.v8.hpc/"
 prefix_output <- "/home/junhuiyang/Documents/Outputs_new/"
 sapply(list.files(pattern=".R", path = paste0(prefix, "R"), full.names = TRUE), source)
 
@@ -13,7 +13,7 @@ sapply(list.files(pattern=".R", path = paste0(prefix, "R"), full.names = TRUE), 
 # sample_size: the sample size in the simulation
 # value: size under the null, and power under the alternative
 
-set.seed(123)
+set.seed(1234)
 # simulation times
 N <- 1000
 # sample size

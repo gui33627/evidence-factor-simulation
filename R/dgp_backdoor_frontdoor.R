@@ -78,6 +78,10 @@ dgp_backdoor_frontdoor_bdoor_correct_f1_violated <- function(n, beta = 1.5) {
   return(data.frame(Y, M, A, C, PO.diff))
 }
 
+# Under the null
+# front-door CI: [1] -0.001605407  0.008140492
+# Under the alternative:
+# front-door CI: [1] -0.008362488  0.001367414
 
 dgp_backdoor_frontdoor_bdoor_correct_f3_violated <- function(n, beta = 3) {
   
@@ -167,8 +171,8 @@ dgp_backdoor_frontdoor_fdoor_correct_b1_violated_alt <- function(n, beta = 3) {
   
   # also create a column for finding true causal effect
   # potential outcomes of M
-  pM1.AUC <- expit(1 * 1 - 1 + C[,2])
-  pM0.AUC <- expit(1 * 0 - 1 + C[,2])
+  pM1.AUC <- expit(0.37 * 1 - 1 + C[,2])
+  pM0.AUC <- expit(0.37 * 0 - 1 + C[,2])
   M1 <- rbinom(n, size = 1, prob = pM1.AUC) 
   M0 <- rbinom(n, size = 1, prob = pM0.AUC)
   M <- ifelse(A==1, M1, M0)
@@ -185,7 +189,10 @@ dgp_backdoor_frontdoor_fdoor_correct_b1_violated_alt <- function(n, beta = 3) {
   return(data.frame(Y, M, A, C, PO.diff))
 }
 
-dgp_backdoor_frontdoor_fdoor_correct_b1_violated_null <- function(n, beta = 3) {
+# Under the Alternative
+#! n= 10^6, 0.37: Backdoor CI: [1] -0.02794134  0.01735062
+
+dgp_backdoor_frontdoor_fdoor_correct_b1_violated_null <- function(n, coef_seq  = 0.05, beta = 3) {
   
   # Unmeasured confounder
   U <- matrix(runif(n, min=-2,max=2))
@@ -195,20 +202,20 @@ dgp_backdoor_frontdoor_fdoor_correct_b1_violated_null <- function(n, beta = 3) {
   
   # Treatment (a function of U, (B1) violated;
   #            there is no unblocked backdoor path from A to M given C, (F2) satisfied)
-  pA.UC <- expit(C[,1] - expit(C[,2]) - sin(C[,3]) + 0.6*U)
+  pA.UC <- expit(C[,1] + expit(C[,2]) + sin(C[,3]) - 0.05*U)
   A <- rbinom(n, size = 1, prob = pA.UC) 
   
   # also create a column for finding true causal effect
   # potential outcomes of M
-  pM1.AUC <- expit(1 * 1 - 1 + C[,2])
-  pM0.AUC <- expit(1 * 0 - 1 + C[,2])
+  pM1.AUC <- expit(5 * 1 - 1 + C[,2])
+  pM0.AUC <- expit(5 * 0 - 1 + C[,2])
   M1 <- rbinom(n, size = 1, prob = pM1.AUC) 
   M0 <- rbinom(n, size = 1, prob = pM0.AUC)
   M <- ifelse(A==1, M1, M0)
   
   # potential outcomes of Y
-  muY1.MAUC <- beta*M1 - 0.1*U + 2* sqrt(abs(C[,1])) + sin(C[,4])
-  muY0.MAUC <- beta*M0 - 0.1*U + 2* sqrt(abs(C[,1])) + sin(C[,4])
+  muY1.MAUC <- beta*M1 + coef_seq*U + 2* sqrt(abs(C[,1])) + sin(C[,4])
+  muY0.MAUC <- beta*M0 + coef_seq*U + 2* sqrt(abs(C[,1])) + sin(C[,4])
   Y1 <- rnorm(n, mean = muY1.MAUC)
   Y0 <- rnorm(n, mean = muY0.MAUC)
   Y <- ifelse(A==1, Y1, Y0)
@@ -218,3 +225,5 @@ dgp_backdoor_frontdoor_fdoor_correct_b1_violated_null <- function(n, beta = 3) {
   return(data.frame(Y, M, A, C, PO.diff))
 }
 
+# Under the null
+# n = 10^6, coef_seq  = 0.05, backdoor CI: [1] -0.008794049  0.001981372

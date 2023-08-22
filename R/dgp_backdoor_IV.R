@@ -143,7 +143,8 @@ dgp_backdoor_iv_bdoor_correct_i3_violated <- function(n, beta = 10, beta_defier 
   return(list(df = data.frame(Y, Z, A, C), idx_complier = idx_complier, CACE =  mean(PO.diff.CACE)))
 }
 
-
+# Under the null
+# IV CI: [1] -0.07456177  0.04643818
 
 # 3. IV assumptions satisfied, but backdoor criterion violated
 # Violate the assumption (B1): there is an unblocked backdoor path from A to Y
@@ -189,6 +190,8 @@ dgp_backdoor_iv_iv_correct_b1_violated <- function(n, beta = 4) {
   return(list(df = data.frame(Y, Z, A, C), idx_complier = idx_complier, CACE =  mean(PO.diff.CACE)))
 }
 
+# Under the null
+# backdoor CI: [1] -0.010258848  0.009483815
 
 dgp_backdoor_iv_iv_correct_b2_violated <- function(n, beta = 4) {
   
@@ -275,7 +278,7 @@ dgp_backdoor_iv_iv_correct_b2_violated_alt_nonzero <- function(n, beta = 4) {
 }
 
 
-dgp_backdoor_iv_iv_correct_b2_violated_alt_zero <- function(n, beta = 4) {
+dgp_backdoor_iv_iv_correct_b2_violated_alt_zero <- function(n, beta = 4, coef_seq = 0.6) {
   
   # Unmeasured confounder
   U <- matrix(runif(n, min=-2,max=2))
@@ -310,12 +313,13 @@ dgp_backdoor_iv_iv_correct_b2_violated_alt_zero <- function(n, beta = 4) {
   Y <- ifelse(A == 1, Y1, Y0) 
   
   # Measured confounders (a node in C is a collider, (B2) violated)
-  C[,1] <- rnorm(n, mean = ((0.5)*A + 2*Y))
+  C[,1] <- rnorm(n, mean = (coef_seq*A + 2*Y))
   
   PO.diff.CACE <- Y1[idx_complier] - Y0[idx_complier]
   
   return(list(df = data.frame(Y, Z, A, C), idx_complier = idx_complier, CACE =  mean(PO.diff.CACE)))
 }
 
-
+# under the alternative
+#! n=10^6, coef_seq = 0.60, backdoor CI: -0.01925129 0.007066126
 
