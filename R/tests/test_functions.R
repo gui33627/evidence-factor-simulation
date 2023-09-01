@@ -4,7 +4,7 @@
 rm(list=ls())
 
 library(mgcv)
-prefix <- "/Users/junhui/Library/CloudStorage/GoogleDrive-junhuiyang@umass.edu/My Drive/UMASS/Courses/Ted_research/simulations.v7.hpc/"
+prefix <- "/Users/junhui/Library/CloudStorage/GoogleDrive-junhuiyang@umass.edu/My Drive/UMASS/Courses/Ted_research/simulations.v8.hpc/"
 sapply(list.files(pattern=".R", path = paste0(prefix, "R"), full.names = TRUE), source)
 
 n <- 1000

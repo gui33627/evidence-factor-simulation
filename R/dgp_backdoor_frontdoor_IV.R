@@ -674,7 +674,7 @@ dgp_backdoor_frontdoor_iv_fdoor_correct_b1i1_violated <- function(n, beta = 3) {
   
   # Unmeasured confounder
   U <- matrix(runif(n, min=-2,max=2))
-  U1 <- matrix(rnorm(n, mean = 2, sd = 1))
+  U1 <- matrix(runif(n, min=-2,max=2))
   
   # Measured confounders (not a descendant of A, (B2) satisfied)
   C <- data.frame(matrix(runif(n * 4, min=-2,max=2), ncol=4))
