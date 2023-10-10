@@ -11,10 +11,10 @@ rm(list=ls())
 
 library(mgcv)
 library(tidyverse)
-prefix <- "/Users/junhui/Library/CloudStorage/GoogleDrive-junhuiyang@umass.edu/My Drive/UMASS/simulations.v7.hpc/"
+prefix <- "./simulations.v7.hpc/"
 sapply(list.files(pattern=".R", path = paste0(prefix, "R"), full.names = TRUE), source)
 
-df <- read.csv("/Users/junhui/Library/CloudStorage/GoogleDrive-junhuiyang@umass.edu/My Drive/UMASS/Framingham/framingham_data_out.csv")
+df <- read.csv("framingham_data_out.csv")
 data <- df %>% select(diabetes_cont_2, smoke_bin_1, hyperten_bin_2, prevhyp_bin_1, 
                       age_cont_1, sex_bin_1, bmi_cont_1, prevchd_bin_1, prediabetes_cont_1) %>% 
   rename(Y = diabetes_cont_2, A = smoke_bin_1, M = hyperten_bin_2, Z = prevhyp_bin_1,

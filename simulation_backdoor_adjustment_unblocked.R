@@ -2,7 +2,7 @@ library(mgcv)
 library(tidyverse)
 library(ggpubr)
 rm(list=ls())
-prefix <- "/Users/junhui/Library/CloudStorage/GoogleDrive-junhuiyang@umass.edu/My Drive/UMASS/Courses/Ted_research/simulations.v8.hpc/"
+prefix <- "./simulations.v8.hpc/"
 sapply(list.files(pattern=".R", path = paste0(prefix, "R"), full.names = TRUE), source)
 
 library(parallel)

@@ -1,6 +1,6 @@
 
 library(tidyverse)
-prefix <- "/Users/junhui/Library/CloudStorage/GoogleDrive-junhuiyang@umass.edu/My Drive/UMASS/Courses/Ted_research/simulations.v8.hpc/results/"
+prefix <- "./simulations.v8.hpc/results/"
 
 df_backdoor_frontdoor_null_all <- read.csv(paste0(prefix, "df_backdoor_frontdoor_null.csv"))
 df_backdoor_frontdoor_alt_all <- read.csv(paste0(prefix, "df_backdoor_frontdoor_alt.csv"))

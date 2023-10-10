@@ -14,7 +14,7 @@ def process_data():
     """
 
     # read in the data
-    orig_data = pd.read_csv("/Users/junhui/Library/CloudStorage/GoogleDrive-junhuiyang@umass.edu/My Drive/UMASS/Courses/Ted_research/Framingham/framingham_data.csv")
+    orig_data = pd.read_csv("framingham_data.csv")
     
     # only keep individuals with at least one follow up
     # since it's a longitudinal study we'll collect
@@ -74,4 +74,4 @@ if __name__ == "__main__":
     data = process_data()
     print(data.columns)
     print(data)
-    data.to_csv("/Users/junhui/Library/CloudStorage/GoogleDrive-junhuiyang@umass.edu/My Drive/UMASS/Courses/Ted_research/Framingham/framingham_data_out.csv", index=False)
+    data.to_csv("framingham_data_out.csv", index=False)
