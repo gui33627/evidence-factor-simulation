@@ -1205,7 +1205,7 @@ power_values = c(power_values, power)
 # 9. front-door is correct, backdoor and IV are wrong
 p_values_alternative_fdoor_correct_b1i2_violated <- foreach(i = 1:N, .combine = c) %dopar% {
   
-  df <- dgp_backdoor_frontdoor_iv_fdoor_correct_b1i2_violated(n = n, beta = 10)
+  df <- dgp_backdoor_frontdoor_iv_fdoor_correct_b1i2_violated_nonoverlap_bias(n = n, beta = 10)
   data <- df$df
   
   # estimate using AIPW (backdoor IF)

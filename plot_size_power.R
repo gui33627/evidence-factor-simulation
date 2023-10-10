@@ -56,7 +56,7 @@ ggsave("backdoor_frontdoor_alternative.png", path =  paste0(prefix, "plots/"),
 
 # BACKDOOR + FRONTDOOR + IV
 # UNDER THE NULL
-df_backdoor_frontdoor_iv_null_ribbon <- df_backdoor_frontdoor_iv_null_all %>% 
+df_backdoor_frontdoor_iv_null <- df_backdoor_frontdoor_iv_null_all %>% 
   ggplot(., aes(x = sample_size, y = size, color = nonzero_functionals)) + 
   # jittering line
   geom_line(position = position_jitter(w=0, h=0.002)) + 
@@ -73,8 +73,8 @@ df_backdoor_frontdoor_iv_null_ribbon <- df_backdoor_frontdoor_iv_null_all %>%
         plot.title = element_text(hjust = 0.5),
         legend.title = element_blank()) 
 
-df_backdoor_frontdoor_iv_null_ribbon
-ggsave("backdoor_frontdoor_iv_null_ribbon.png", path =  paste0(prefix, "plots/"),
+df_backdoor_frontdoor_iv_null
+ggsave("backdoor_frontdoor_iv_null.png", path =  paste0(prefix, "plots/"),
        width = 15, height = 15, units = "cm")
 
 

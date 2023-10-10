@@ -5,7 +5,7 @@
 
 # valid backdoor adjustments include C2 and C4
 # invalid backdoor adjustments because of controlling a collider include C1 
-# invalid backdoor adjustments because of an unblocked backdoor path don't inlcude C2 or C4
+# invalid backdoor adjustments because of an unblocked backdoor path through C2 or C4
 dgp_backdoor_adjustment <- function(n, beta = 3) {
   
   # Unmeasured confounder
@@ -34,6 +34,32 @@ dgp_backdoor_adjustment <- function(n, beta = 3) {
 }
 
 
+# valid backdoor adjustments include C1
+# invalid backdoor adjustments because of an unblocked backdoor path through C1
+
+dgp_backdoor_adjustment_ef_violated <- function(n, beta = 3) {
+  
+  # Unmeasured confounder
+  U <- matrix(runif(n, min=-2,max=2))
+  
+  # Measured confounders 
+  C <- data.frame(matrix(runif(n * 4, min=-2,max=2), ncol=4))
+  
+  # Treatment (a function only of measured confounders C, not a function of U, (B1) satisfied)
+  pA.UC <- expit(C[,1] + C[,2])
+  A <- rbinom(n, size = 1, prob = pA.UC) 
+  
+  # Outcome 
+  muY1.AUC <- beta*1 + U + 4*C[,1] + C[,3]
+  muY0.AUC <- beta*0 + U + 4*C[,1] + C[,3]
+  Y1 <- rnorm(n, mean = muY1.AUC)
+  Y0 <- rnorm(n, mean = muY0.AUC)
+  Y <- ifelse(A==1, Y1, Y0)
+  
+  PO.diff <- Y1 - Y0
+  
+  return(data.frame(Y, A, C, PO.diff))
+}
 
 
 

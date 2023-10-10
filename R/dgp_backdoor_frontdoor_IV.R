@@ -718,7 +718,52 @@ dgp_backdoor_frontdoor_iv_fdoor_correct_b1i1_violated <- function(n, beta = 3) {
 }
 
 
-dgp_backdoor_frontdoor_iv_fdoor_correct_b1i2_violated <- function(n, beta = 3) {
+# dgp_backdoor_frontdoor_iv_fdoor_correct_b1i2_violated <- function(n, beta = 3) {
+#   
+#   # Unmeasured confounder
+#   U <- matrix(runif(n, min=-2,max=2))
+#   
+#   # Measured confounders (not a descendant of A, (B2) satisfied)
+#   C <- data.frame(matrix(runif(n * 4, min=-2,max=2), ncol=4))
+#   
+#   # Instrumental variable (randomized, (I1) satisfied)
+#   Z <- rbinom(n = n, size = 1, prob = 0.5)
+#   
+#   # Treatment (a function of U, there is an unblocked backdoor path from A and Y, (B1) violated)
+#   pA.UC <- expit(C[,1] + expit(C[,2]) + sin(C[,3]) + U)
+#   A1 <- rbinom(n, size = 1, prob = pA.UC)
+#   A0 <- rbinom(n, size = 1, prob = 1-pA.UC)
+#   
+#   # no defier, convert to compliers ((I3) satisfied)
+#   idx_defier <- which(A1 == 0 & A0 == 1)
+#   A1[idx_defier] <- 1
+#   A0[idx_defier] <- 0
+#   
+#   idx_complier <- which(A1 == 1 & A0 == 0)
+#   idx_never <- which(A1 == 0 & A0 == 0)
+#   idx_always <- which(A1 == 1 & A0 == 1)
+#   #  A is determined by Z based on the four types of people, (I4) satisfied
+#   A <- ifelse(Z == 1, A1, A0)
+#   
+#   # potential outcomes of mediator (not a function of U, so no unblocked backdoor path from A to M given C, (F2) satisfied; no unblocked backdoor path from M to Y given C, (F3) satisfied)
+#   pM1.AUC <- expit(2 * 1 - 1 + C[,2]) # pM1.AUC and pM0.AUC are the same for never takers and always takers, exclusion restriction satisfied
+#   pM0.AUC <- expit(2 * 0 - 1 + C[,2])
+#   M1 <- rbinom(n, size = 1, prob = pM1.AUC) 
+#   M0 <- rbinom(n, size = 1, prob = pM0.AUC)
+#   M <- ifelse(A == 1, M1, M0) # Z affects M only through A
+#   
+#   # potential outcomes of Y (not a function of A, (F1) satisfied; a function of Z, (I2) violated)
+#   error <- rnorm(n, mean = 0)
+#   Y1 <- beta*M1 + 3*U + 2* sqrt(abs(C[,1])) + sin(C[,4]) + 2*Z + error
+#   Y0 <- beta*M0 + 3*U + 2* sqrt(abs(C[,1])) + sin(C[,4]) + 2*Z + error
+#   Y <- ifelse(A == 1, Y1, Y0) # Z affects Y only through A via M
+#   
+#   PO.diff.CACE <- Y1[idx_complier] - Y0[idx_complier]
+#   
+#   return(list(df = data.frame(Y, Z, M, A, C), idx_complier = idx_complier, CACE =  mean(PO.diff.CACE)))
+# }
+
+dgp_backdoor_frontdoor_iv_fdoor_correct_b1i2_violated_nonoverlap_bias <- function(n, beta = 3) {
   
   # Unmeasured confounder
   U <- matrix(runif(n, min=-2,max=2))
@@ -729,8 +774,8 @@ dgp_backdoor_frontdoor_iv_fdoor_correct_b1i2_violated <- function(n, beta = 3) {
   # Instrumental variable (randomized, (I1) satisfied)
   Z <- rbinom(n = n, size = 1, prob = 0.5)
   
-  # Treatment (a function of U, there is an unblocked backdoor path from A and Y, (B1) violated)
-  pA.UC <- expit(C[,1] + expit(C[,2]) + sin(C[,3]) + U)
+  # Treatment 
+  pA.UC <- expit(C[,1] + expit(C[,2]) + sin(C[,3]))
   A1 <- rbinom(n, size = 1, prob = pA.UC)
   A0 <- rbinom(n, size = 1, prob = 1-pA.UC)
   
@@ -752,7 +797,7 @@ dgp_backdoor_frontdoor_iv_fdoor_correct_b1i2_violated <- function(n, beta = 3) {
   M0 <- rbinom(n, size = 1, prob = pM0.AUC)
   M <- ifelse(A == 1, M1, M0) # Z affects M only through A
   
-  # potential outcomes of Y (not a function of A, (F1) satisfied; a function of Z, (I2) violated)
+  # potential outcomes of Y (not a function of A, (F1) satisfied; a function of Z, (I2) violated and (B1) violated)
   error <- rnorm(n, mean = 0)
   Y1 <- beta*M1 + 3*U + 2* sqrt(abs(C[,1])) + sin(C[,4]) + 2*Z + error
   Y0 <- beta*M0 + 3*U + 2* sqrt(abs(C[,1])) + sin(C[,4]) + 2*Z + error
