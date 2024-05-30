@@ -111,9 +111,8 @@ evidence_factor <- function(est, eif){
   
   stat <- sqrt(n) * abs(prod(all.est)) / sqrt(delta.var)
   
-  # one-sided test
-  return(pnorm(stat, lower.tail = FALSE))
-  # return(pnorm(stat, lower.tail = FALSE) * 2)
+  # two sided test
+  return(pnorm(stat, lower.tail = FALSE) * 2)
   
 }
 
@@ -167,7 +166,7 @@ estimate_uiv <- function(data){
 }
 
 ######################### Asymptotic joint test ################################
-### beta <= 0, unconditional IV
+### beta = 0, unconditional IV
 # estimate using AIPW (backdoor IF)
 ef_bdoor <- estimate_backdooor(data_catholic)
 backdoor.est <- ef_bdoor$backdoor.est
@@ -189,48 +188,17 @@ iv.ci_urban <- iv.est_urban + c(-1,1) * qnorm(.975) * sd(iv.eif_urban) / sqrt(n)
 iv.ci_catholic <- iv.est_catholic + c(-1,1) * qnorm(.975) * sd(iv.eif_catholic) / sqrt(n)
 
 # Marginal tests for backdoor and iv
-backdoor.p <- pnorm(sqrt(n) * abs(backdoor.est) / sd(backdoor.eif), lower.tail = FALSE) 
-iv.p_urban <- pnorm(sqrt(n) * abs(iv.est_urban) / sd(iv.eif_urban), lower.tail = FALSE) 
-iv.p_catholic <- pnorm(sqrt(n) * abs(iv.est_catholic) / sd(iv.eif_catholic), lower.tail = FALSE) 
+backdoor.p <- pnorm(sqrt(n) * abs(backdoor.est) / sd(backdoor.eif), lower.tail = FALSE) * 2
+iv.p_urban <- pnorm(sqrt(n) * abs(iv.est_urban) / sd(iv.eif_urban), lower.tail = FALSE) * 2
+iv.p_catholic <- pnorm(sqrt(n) * abs(iv.est_catholic) / sd(iv.eif_catholic), lower.tail = FALSE) * 2
 
 est <- c(backdoor.est, iv.est_urban, iv.est_catholic)
 eif <- cbind(backdoor.eif, iv.eif_urban, iv.eif_catholic)
 ef <- evidence_factor(est = est, eif = eif)
 
-
-### beta <= 500, unconditional IV
-# estimate using AIPW (backdoor IF)
-ef_bdoor_500 <- estimate_backdooor(data_urban_500)
-backdoor.est_500 <- ef_bdoor_500$backdoor.est
-backdoor.eif_500 <- ef_bdoor_500$backdoor.eif
-
-# estimate using UIV (IV = urban/rural)
-ef_iv_urban_500 <- estimate_uiv(data_urban_500)
-iv.est_urban_500 <- ef_iv_urban_500$iv.est
-iv.eif_urban_500 <- ef_iv_urban_500$iv.eif
-
-# estimate using UIV (IV = catholic/non-catholic)
-ef_iv_catholic_500 <- estimate_uiv(data_catholic_500)
-iv.est_catholic_500 <- ef_iv_catholic_500$iv.est
-iv.eif_catholic_500 <- ef_iv_catholic_500$iv.eif
-
-# CIs for backdoor and iv
-backdoor.ci_500 <- backdoor.est_500 + c(-1,1) * qnorm(.975) * sd(backdoor.eif_500) / sqrt(n)
-iv.ci_urban_500 <- iv.est_urban_500 + c(-1,1) * qnorm(.975) * sd(iv.eif_urban_500) / sqrt(n)
-iv.ci_catholic_500 <- iv.est_catholic_500 + c(-1,1) * qnorm(.975) * sd(iv.eif_catholic_500) / sqrt(n)
-
-# Marginal tests for backdoor and iv
-backdoor.p_500 <- pnorm(sqrt(n) * abs(backdoor.est_500) / sd(backdoor.eif_500), lower.tail = FALSE) 
-iv.p_urban_500 <- pnorm(sqrt(n) * abs(iv.est_urban_500) / sd(iv.eif_urban_500), lower.tail = FALSE) 
-iv.p_catholic_500 <- pnorm(sqrt(n) * abs(iv.est_catholic_500) / sd(iv.eif_catholic_500), lower.tail = FALSE) 
-
-est <- c(backdoor.est_500, iv.est_urban_500, iv.est_catholic_500)
-eif <- cbind(backdoor.eif_500, iv.eif_urban_500, iv.eif_catholic_500)
-ef_500 <- evidence_factor(est = est, eif = eif)
-
-print(data.frame(Case = c("H0:beta<=0", "H0:beta<=500"),
-                 Marginal_test_bdoor = c(backdoor.p, backdoor.p_500),
-                 Marginal_test_iv_urban = c(iv.p_urban, iv.p_urban_500),
-                 Marginal_test_iv_catholic = c(iv.p_catholic, iv.p_catholic_500),
-                 Asy_joint_test = c(ef, ef_500),
-                 check.names = FALSE), digits = 2)
+print(data.frame(Case = "H0:beta=0",
+                 Marginal_test_bdoor = backdoor.p,
+                 Marginal_test_iv_urban = iv.p_urban,
+                 Marginal_test_iv_catholic = iv.p_catholic,
+                 Asy_joint_test = ef,
+                 check.names = FALSE), digits = 4)
