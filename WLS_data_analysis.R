@@ -201,4 +201,7 @@ print(data.frame(Case = "H0:beta=0",
                  Marginal_test_iv_urban = iv.p_urban,
                  Marginal_test_iv_catholic = iv.p_catholic,
                  Asy_joint_test = ef,
-                 check.names = FALSE), digits = 4)
+                 check.names = FALSE))
+
+cor(eif)
+
